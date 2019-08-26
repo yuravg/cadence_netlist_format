@@ -1,0 +1,5 @@
+[Configuration]
+netlist_file = ./pstxnet.dat
+
+[Info]
+Description = Configuration file to Format Cadence Allegro net-list file

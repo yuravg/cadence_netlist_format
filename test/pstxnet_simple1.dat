@@ -1,0 +1,116 @@
+FILE_TYPE = EXPANDEDNETLIST;
+{ Using PSTWRITER 16.3.0 p002Mar-22-2016 at 10:54:51 }
+NET_NAME
+'AVDDI_D_0_XXX5'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	R634 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	R636 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	R673 1
+ '@CAPTURENAME.some_text':
+ 'node_n-1':;
+NET_NAME
+'B_DCLKOL_0_XXX4'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	R673 2
+ '@CAPTURENAME.some_text':
+ 'node_n-1':;
+NET_NAME
+'N169400_TMP0'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DA153 3
+ '@CAPTURENAME.some_text':
+ 'node_n-IN_3':;
+NODE_NAME	DA153 4
+ '@CAPTURENAME.some_text':
+ 'node_n-IN_4':;
+NODE_NAME	Z309 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	C773 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NET_NAME
+'CTRL_CPV0'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DD2 G3
+ '@CAPTURENAME.some_text':
+ 'node_n-DIFFIO_L1N':;
+NET_NAME
+'VCCIO_3V3'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DD2 D4
+ '@CAPTURENAME.some_text':
+ 'node_n-VCCIO1_D4':;
+NODE_NAME	DD2 H4
+ '@CAPTURENAME.some_text':
+ 'node_n-VCCIO1_H4':;
+NET_NAME
+'N17058846_0_XXX4'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DD35 6
+ '@CAPTURENAME.some_text':
+ 'node_n-6':;
+NET_NAME
+'DCLKOL1'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text',
+ DIFFERENTIAL_PAIR='DCLKO1';
+NODE_NAME	DD2 M1
+ '@CAPTURENAME.some_text':
+ 'node_n-DIFFIO_L27N':;
+NODE_NAME	XS5 14
+ '@CAPTURENAME.some_text':
+ 'node_n-14':;
+NET_NAME
+'DOUTAL10'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text',
+ DIFFERENTIAL_PAIR='DOUTA10';
+NODE_NAME	DD2 M20
+ '@CAPTURENAME.some_text':
+ 'node_n-DIFFIO_R30N':;
+NODE_NAME	XS3 17
+ '@CAPTURENAME.some_text':
+ 'node_n-node_n-17':;
+NET_NAME
+'DOUTAL1'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text',
+ DIFFERENTIAL_PAIR='DOUTA1';
+NODE_NAME	DD2 P7
+ '@CAPTURENAME.some_text':
+ 'node_n-DIFFIO_L49N':;
+NODE_NAME	XS5 17
+ '@CAPTURENAME.some_text':
+ 'node_n-17':;
+NODE_NAME	R401 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NET_NAME
+'DCLKL0'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text',
+ DIFFERENTIAL_PAIR='DCLK0';
+NODE_NAME	R45 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	DD2 D10
+ '@CAPTURENAME.some_text':
+ 'node_n-DIFFIO_T26N':;
+NODE_NAME	XS1 11
+ '@CAPTURENAME.some_text':
+ 'node_n-11':;
+NODE_NAME	R92 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+END.

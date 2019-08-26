@@ -1,0 +1,55 @@
+FILE_TYPE = EXPANDEDNETLIST;
+{ Using PSTWRITER 16.3.0 p002Mar-22-2016 at 10:54:51 }
+NET_NAME
+'AVDDI_D_0_XXX5'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	R634 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	R636 2
+ '@CAPTURENAME.some_text':
+ 'node_n-2':;
+NODE_NAME	R673 1
+ '@CAPTURENAME.some_text':
+ 'node_n-1':;
+NET_NAME
+'B_DCLKOL_0_XXX4'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	R598 6
+ '@CAPTURENAME.some_text':
+ 'node_n-6':;
+NODE_NAME	R562 1
+ '@CAPTURENAME.some_text':
+ 'node_n-1':;
+NET_NAME
+'A16910366_0_XXX3'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DA74 13
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NODE_NAME	C74 6
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NODE_NAME	R74 5
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NODE_NAME	DA74 s3
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NODE_NAME	DD12 33
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NET_NAME
+'aa910366_0_XXX3'
+ '@CAPTURENAME.some_text':
+ C_SIGNAL='@some_text';
+NODE_NAME	DD74 33
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+NODE_NAME	C741 1
+ '@CAPTURENAME.some_text':
+ 'node_n-CH2':;
+END.

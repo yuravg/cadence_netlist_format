@@ -1,0 +1,28 @@
++-------------------------------------------------------------------------+
+| File contains Cadence PCB Editor netlist                                |
+| NOTE: this file was auto-generated                                      |
+| generation date, time: 2016-10-28 12:51:57                              |
++-------------------------------------------------------------------------+
+| Cadence net-list file info:                                             |
+|  Net-list Mar-22-2016 10:54:51 (version: 16.3.0)
+|  ./files2self_test/pstxnet_smol.dat
++-------------------------------------------------------------------------+
+AVDDI_D_0_XXX5 R634 2 R636 2 R673 1
+B_DCLKOL_0_XXX4 R673 2
+CTRL_CPV0 DD2 G3
+DCLKL0 R45 2 DD2 D10 XS1 11 R92 2
+DCLKOL1 DD2 M1 XS5 14
+DOUTAL1 DD2 P7 XS5 17 R401 2
+DOUTAL10 DD2 M20 XS3 17
+N169400_TMP0 DA153 3 DA153 4 Z309 2 C773 2
+N17058846_0_XXX4 DD35 6
+VCCIO_3V3 DD2 D4 DD2 H4
+
+
+
++-------------------------------------------------------------------------+
+| Warnings: Single node name                                              |
++-------------------------------------------------------------------------+
+B_DCLKOL_0_XXX4 R673 2
+CTRL_CPV0 DD2 G3
+N17058846_0_XXX4 DD35 6
