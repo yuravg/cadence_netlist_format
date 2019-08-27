@@ -12,13 +12,27 @@ RESET X1 29 R64 1 R131 8
 ...
 ```
 
-# Build
+# Install
+
+install release or install from source
+
+## Install release
+
+- download latest [release](https://github.com/yuravg/cadence_netlist_format/releases)
+
+- install `pip install dist/cadence_netlist_format-<versoin>.tar.gz`
+
+## Build and install from source
+
+- Download source
+
+- Build
 
 to build the Python package you need to run
 
 `make build`
 
-# Install
+- Install
 to install python package:
 
 `make install`
