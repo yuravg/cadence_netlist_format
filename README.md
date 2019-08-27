@@ -33,6 +33,7 @@ to build the Python package you need to run
 `make build`
 
 - Install
+
 to install python package:
 
 `make install`
