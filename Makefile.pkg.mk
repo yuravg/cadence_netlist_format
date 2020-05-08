@@ -24,9 +24,9 @@ clean:
 
 build:
 	$(MAKE) clean
-	python setup.py sdist
+	python setup.py bdist_wheel
 
-last_pkg_name =$(lastword $(sort $(wildcard dist/*.tar.gz)))
+last_pkg_name =$(lastword $(sort $(wildcard dist/*)))
 install:
 	@echo "+-------------------------------------------------------------------------+"
 	@echo "| Installation package: $(last_pkg_name)"

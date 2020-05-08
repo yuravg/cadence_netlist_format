@@ -20,7 +20,7 @@ install release or install from source
 
 - download latest [release](https://github.com/yuravg/cadence_netlist_format/releases)
 
-- install `pip install dist/cadence_netlist_format-<versoin>.tar.gz`
+- install `pip install dist/cadence_netlist_format-<versoin>.whl`
 
 ## Build and install from source
 
@@ -40,7 +40,7 @@ to install python package:
 
 or
 
-`pip install dist/cadence_netlist_format-<versoin>.tar.gz`
+`pip install dist/cadence_netlist_format-<versoin>.whl`
 
 # Usage
 
