@@ -47,3 +47,7 @@ or
 run at the command prompt:
 
 `cnl_format`
+
+Screenshot:
+
+![Screenshot](./doc/gui.png)
