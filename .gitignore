@@ -1,0 +1,18 @@
+.venv/
+build/
+dist/
+test_env/
+
+# Python artifacts
+*.pyc
+__pycache__/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Ignore generated NetList.rpt files
+examples/NetList.rpt*
