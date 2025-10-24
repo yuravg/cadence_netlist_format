@@ -1,0 +1,42 @@
+[run]
+source = src/cadence_netlist_format
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */site-packages/*
+    .venv/*
+    test_env/*
+
+[report]
+# Target: 70% overall coverage (per TASKS.md)
+precision = 2
+show_missing = True
+skip_covered = False
+
+# Fail if coverage is below threshold (commented out for now)
+# fail_under = 70
+
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code
+    def __repr__
+
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run
+    if __name__ == .__main__.:
+
+    # Don't complain about Python 2/3 compatibility code
+    if sys.version_info
+
+[html]
+directory = htmlcov
+title = Cadence Netlist Format - Coverage Report
+
+[xml]
+output = coverage.xml
