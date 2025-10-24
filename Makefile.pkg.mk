@@ -24,7 +24,7 @@ clean:
 
 build:
 	$(MAKE) clean
-	python setup.py bdist_wheel
+	python -m build
 
 last_pkg_name =$(lastword $(sort $(wildcard dist/*)))
 install:

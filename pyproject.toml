@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cadence_netlist_format"
+version = "1.0.0"
+description = "CLI to format Cadence Allegro Net-List to readable file"
+readme = "README.md"
+requires-python = ">=2.7"
+license = "MIT"
+authors = [
+    {name = "Yuriy VG", email = "yuravg@gmail.com"}
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yuravg/cadence_netlist_format"
+
+# Optional development dependencies
+[project.optional-dependencies]
+dev = [
+    "pytest>=4.6; python_version >= '2.7'",
+    "pytest-cov>=2.10; python_version >= '2.7'",
+    "build>=0.7",
+    "wheel",
+]
+
+# This creates an executable command called 'cnl_format'
+# that calls the main() function in cadence_netlist_format module
+[project.scripts]
+cnl_format = "cadence_netlist_format.main:main"
+
+# Setuptools-specific configuration
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cadence_netlist_format*"]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["test"]
+addopts = "-v"
