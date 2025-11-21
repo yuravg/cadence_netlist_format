@@ -1,0 +1,6 @@
+[Configuration]
+netlist_file = ../tests/data/inputs/pstxnet_v3.dat
+
+[Info]
+Description = Configuration file for Format Cadence Allegro net-list examples
+
