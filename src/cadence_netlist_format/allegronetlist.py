@@ -87,7 +87,7 @@ class AllegroNetList(object):
                                 wait_refdes_cnt = wait_refdes_cnt + 1
                             else:
                                 wait_refdes_en = False
-                                for char in "\ \';:":
+                                for char in r"\ ';:":
                                     s = s.replace(char, '')
                                 ref_and_pin.append(s)
                         if cnt_string < 3:
