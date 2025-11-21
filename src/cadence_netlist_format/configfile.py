@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# Time-stamp: <2017-04-14 15:43:04>
-
 """
 Work wiht configuration file by ConfigParser
 """
@@ -11,9 +9,7 @@ try:
 except ImportError:  # for version < 3.0
     from ConfigParser import ConfigParser
 
-__version__ = '0.1.3'
-
-config = ConfigParser()
+__version__ = '1.0'
 
 
 class ConfigFile(object):
@@ -28,37 +24,44 @@ class ConfigFile(object):
             }
     """
 
-    def __init__(self, fname='fname.ini', k={}, verbosity=0):
+    def __init__(self, fname='fname.ini', k=None, verbosity=0):
         """Open configuration file name, read keys
-        If configuration file has key, it's value will override initial valueq
+        If configuration file has key, it's value will override initial value
         Keyword Arguments:
         fname     -- file name
-        k         -- configuration keys
+        k         -- configuration keys (default: None, which creates empty dict)
         verbosity -- verbosity for work with config file (1 - for enable verbosity)
         """
+        # Fix mutable default argument
+        if k is None:
+            k = {}
+
         if verbosity == 1:
             self.verbosity = 1
         else:
             self.verbosity = 0
         self.fname = fname
-        config.optionxform = str
-        config.read(fname)
+
+        # Create instance parser instead of using global
+        self.config = ConfigParser()
+        self.config.optionxform = str
+        self.config.read(fname)
         # override from file:
         for section in k:
             for i in k[section]:
-                if config.has_option(section, i):
-                    k[section][i] = config.get(section, i)
+                if self.config.has_option(section, i):
+                    k[section][i] = self.config.get(section, i)
                     if self.verbosity:
                         print('read config: section: %s, keys: %s=%s' %
                               (section, i, k[section][i]))
         # get all section from file: kf - keys of file
-        sections = config.sections()
+        sections = self.config.sections()
         kf = {}
         for section in sections:
             ki = {}
-            keys = list(config[section].keys())
+            keys = list(self.config[section].keys())
             for i in keys:
-                val = config.get(section, i)
+                val = self.config.get(section, i)
                 ki[i] = val
                 kf[section] = ki
         self.k = kf
@@ -130,14 +133,14 @@ class ConfigFile(object):
     def write2file(self):
         """Write keys to configuration file
         """
-        sections = config.sections()
+        sections = self.config.sections()
         for section in sorted(self.k):
             if section not in sections:
-                config.add_section(section)
+                self.config.add_section(section)
             for i in sorted(self.k[section]):
-                config.set(section, i, self.k[section][i])
+                self.config.set(section, i, self.k[section][i])
         with open(self.fname, 'w') as configfile:
-            config.write(configfile)
+            self.config.write(configfile)
 
     def __str__(self):
         s = 'File name: %s' % str(self.fname)

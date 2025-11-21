@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
-# Time-stamp: <2018-02-19 14:55:01>
 """Get data from Cadence Allegro net-list
 """
 
 from __future__ import print_function
 import datetime
+import logging
 
-__version__ = '0.1.0'
+__version__ = '1.0'
+
+# Configure module logger
+logger = logging.getLogger(__name__)
 
 
 class AllegroNetList(object):
@@ -27,121 +30,166 @@ class AllegroNetList(object):
                      ['REFDESN',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']]]
     """
 
-    net_list = []
-    date = 0
-    time = 0
-    version = 0
-    refdes_list = []
-
     def __init__(self, fname):
+        # type: (str) -> None
         """Get data from net-list (read from file)
+
+        Args:
+            fname: Path to the netlist file
         """
+        # Initialize instance attributes (not class attributes)
+        self.net_list = []  # type: list
+        self.date = 0  # type: int
+        self.time = 0  # type: int
+        self.version = 0  # type: int
+        self.refdes_list = []  # type: list
+        self.fname = fname  # type: str
         self.read_file(fname)
-        self.fname = fname
 
     def read_file(self, fname):
-        """read file data"""
+        # type: (str) -> None
+        """Read and parse netlist data from file.
+
+        The parser is a state machine that processes:
+        1. Header lines (first 3 lines contain version/date/time)
+        2. NET_NAME declarations (net name on next line)
+        3. NODE_NAME entries (component + pin, with pin name 2 lines later)
+        4. END marker (final net-list termination)
+
+        Args:
+            fname: Path to netlist file
+        """
+        # Constants for clarity
+        HEADER_LINE_COUNT = 3
+        PIN_NAME_LINE_OFFSET = 2
+
         try:
-            # print('read fname: ' + str(fname))
             with open(fname, 'r') as f:
-                find_net_name = 0
-                wait_end_net = 0
-                net = []
-                node = []
-                cnt_string = 0
-                wait_refdes_cnt = 0
-                wait_refdes_en = False
+                # State machine variables
+                expecting_net_name = False  # Next line contains the net name
+                processing_net = False      # Currently processing a net's nodes
+                current_net = []
+                current_nodes = []
+
+                # Pin name extraction state
+                waiting_for_pin_name = False
+                pin_name_line_counter = 0
+                current_node_ref = None  # Reference to node being processed
+
+                # Header parsing
+                header_line_number = 0
+
                 self.net_list = []
+
                 for line in f:
                     s = line.rstrip()
+
                     try:
-                        if find_net_name:
-                            find_net_name = 0
-                            wait_end_net = 1
-                            # cut char - ' from net name
-                            net = s[1:len(s)-1]
-                            # print('Find net_name', net)
-                        if s.find('NET_NAME') == 0 or s.find('END.') == 0:
-                            if wait_end_net:
-                                wait_end_net = 0
-                                net_and_node = [net, node]
-                                net = []
-                                node = []
+                        # State 1: Extract net name (line after NET_NAME)
+                        if expecting_net_name:
+                            expecting_net_name = False
+                            processing_net = True
+                            # Remove surrounding single quotes from net name
+                            current_net = s.strip("'")
+
+                        # State 2: Process NET_NAME or END markers
+                        if s.startswith('NET_NAME') or s.startswith('END.'):
+                            # Save previous net if we were processing one
+                            if processing_net:
+                                processing_net = False
+                                net_and_node = [current_net, current_nodes]
+                                current_net = []
+                                current_nodes = []
                                 self.net_list.append(net_and_node)
-                                # print('net and node:', net_and_node)
-                            find_net_name = 1
-                            net = s
-                            # print('Wait net')
-                        else:
-                            if s.find('NODE_NAME') == 0:
-                                s = s.split()
-                                ref_des = s[1]
-                                des_pin = s[2]
-                                ref_and_pin = [ref_des, des_pin]
-                                # print(' Find node:', ref_and_pin)
-                                node.append(ref_and_pin)
-                                wait_refdes_en = True
-                                wait_refdes_cnt = 0
-                        if wait_refdes_en:
-                            if wait_refdes_cnt < 2:
-                                wait_refdes_cnt = wait_refdes_cnt + 1
+
+                            # Prepare for next net name
+                            expecting_net_name = True
+                            current_net = s
+
+                        # State 3: Process NODE_NAME (component + pin)
+                        elif s.startswith('NODE_NAME'):
+                            parts = s.split()
+                            ref_des = parts[1]
+                            pin_number = parts[2]
+                            ref_and_pin = [ref_des, pin_number]
+                            current_nodes.append(ref_and_pin)
+
+                            # Prepare to extract pin name (appears 2 lines later)
+                            waiting_for_pin_name = True
+                            pin_name_line_counter = 0
+                            current_node_ref = ref_and_pin
+
+                        # State 4: Extract pin name (2 lines after NODE_NAME)
+                        if waiting_for_pin_name:
+                            if pin_name_line_counter < PIN_NAME_LINE_OFFSET:
+                                pin_name_line_counter += 1
                             else:
-                                wait_refdes_en = False
+                                waiting_for_pin_name = False
+                                # Clean up pin name (remove special characters)
+                                pin_name = s
                                 for char in r"\ ';:":
-                                    s = s.replace(char, '')
-                                ref_and_pin.append(s)
-                        if cnt_string < 3:
-                            cnt_string = cnt_string + 1
-                        if cnt_string == 2:
-                            # NOTE: example sting:
-                            #    { Using PSTWRITER 16.3.0 p002Mar-22-2016 at 10:54:51 }
+                                    pin_name = pin_name.replace(char, '')
+                                current_node_ref.append(pin_name)
+
+                        # State 5: Parse header (first 3 lines contain metadata)
+                        if header_line_number < HEADER_LINE_COUNT:
+                            header_line_number += 1
+
+                        if header_line_number == 2:
+                            # Example header line 2:
+                            #   { Using PSTWRITER 16.3.0 p002Mar-22-2016 at 10:54:51 }
                             cfg = s.split()
                             self.version = cfg[3]
-                            self.date = cfg[4][4:]
+                            self.date = cfg[4][4:]  # Remove "p002" prefix
                             self.time = cfg[6]
-                    except OSError:
-                        print('+-----------------------------------+')
-                        print('| Error! With Net-list handler      |')
-                        print('+-----------------------------------+')
-            self.net_list.sort()
-        except OSError:
-            print('+-----------------------------------+')
-            print('| Error! With file: \'%s\'' % fname)
-            print('+-----------------------------------+')
-        finally:
-            f.close()
+
+                    except (IndexError, KeyError) as e:
+                        logger.warning('Error parsing net-list data: %s', str(e))
+
+                # Sort nets alphabetically
+                self.net_list.sort()
+
+        except (IOError, OSError) as e:
+            logger.error('Cannot read file \'%s\': %s', fname, str(e))
+            raise
 
     def net_list_length(self):
+        # type: () -> int
         """Returns length of net-list"""
         return len(self.net_list)
 
     def check_net_index(self, i):
+        # type: (int) -> bool
         """Check valid net-list index (to get net name)
-        Keyword Arguments:
-        i -- net-list index
+
+        Args:
+            i: net-list index
+
         Returns:
-        Returns true if index is valid
+            True if index is valid, False otherwise
         """
         length = self.net_list_length()
         if i >= length:
-            print('Error! Index of net=%d, more then net-list length=%d (from 0 to %d)' %
-                  (i, length-1, length-1))
+            logger.error('Invalid net index %d (valid range: 0 to %d)', i, length-1)
             return False
         else:
             return True
 
     def net_name(self, i):
+        # type: (int) -> str
         """Returns net name from net-list
-        Keyword Arguments:
-        i -- net name index
+
+        Args:
+            i: net name index
+
         Returns:
-        Net name or false
+            Net name or None if index is invalid
         """
         if self.check_net_index(i):
             net = self.net_list[i][0]
             return net
         else:
-            return False
+            return None
 
     def node_list(self, i):
         """Returns refdes and pin list from net-list
@@ -151,12 +199,12 @@ class AllegroNetList(object):
         if self.check_net_index(i):
             node = []
             net = self.net_list[i][1]
-            for i in net:
-                v = i[:2]
+            for node_entry in net:
+                v = node_entry[:2]
                 node.append(v)
             return node
         else:
-            return 0
+            return None
 
     def get_refdes_pin_name(self, p_refdes, p_pin):
         """Return refdes pin name as string"""
@@ -180,15 +228,12 @@ class AllegroNetList(object):
         Keyword Arguments:
         i -- net name index
         """
-        node = ''
         node_list = self.node_list(i)
-        for i in node_list:
-            k = ' '.join(i)
-            if node == '':
-                node = '%s' % k
-            else:
-                node = '%s %s' % (node, k)
-        return node
+        if node_list is None:
+            return ''
+        # Optimize: use join instead of string concatenation in loop
+        node_strings = [' '.join(node_entry) for node_entry in node_list]
+        return ' '.join(node_strings)
 
     def find_in_refdes_list(self, refdes):
         """Find refdes in refdes list
@@ -225,7 +270,7 @@ class AllegroNetList(object):
         if find_net:
             return True
         else:
-            print('Error! Can\'t find refdes: \'%s\' in net-list: %s' % (refdes, self.fname))
+            logger.error('Cannot find refdes \'%s\' in net-list: %s', refdes, self.fname)
             return False
 
     def get_net_name4refdes_pin(self, refdes, pin):
@@ -259,15 +304,17 @@ class AllegroNetList(object):
                         s = '%s %s:%s' % (s, j[0], j[1])
             return s
         else:
-            print('Error! Can\'t find refdes: \'%s\'' % refdes)
+            logger.error('Cannot find refdes \'%s\' in refdes list', refdes)
             return ''
 
     def net2string(self, i):
-        """Returns full net as sting (net name and her refdes and pins)
+        """Returns full net as string (net name and her refdes and pins)
         Keyword Arguments:
         i -- net name index
         """
         net = self.net_name(i)
+        if net is None:
+            return ''
         node = self.node2string(i)
         # print('net: %s' % net)
         # print('node: %s' % node)
@@ -276,38 +323,32 @@ class AllegroNetList(object):
         return net_and_node
 
     def __str__(self):
-        """Returns net-list as sting
+        """Returns net-list as string
         """
-        s = ''
-        for i in range(self.net_list_length()):
-            if s == '':
-                s = '%s' % self.net2string(i)
-            else:
-                s = '%s\n%s' % (s, self.net2string(i))
-        return s
+        # Optimize: use join instead of string concatenation in loop
+        lines = [self.net2string(i) for i in range(self.net_list_length())]
+        return '\n'.join(lines)
 
     def net_list2string(self):
-        """Return net-list data as stirng
+        """Return net-list data as string
         """
-        s = ''
-        for i in range(self.net_list_length()):
-            string = self.net2string(i)
-            s = s + string + '\n'
-        return s
+        # Optimize: use join instead of string concatenation in loop
+        lines = [self.net2string(i) for i in range(self.net_list_length())]
+        return '\n'.join(lines) + '\n'
 
     def single_net_list2string(self):
-        """Return single net-list data as stirng
+        """Return single net-list data as string
         """
-        s = ''
+        # Optimize: use join with list comprehension (avoid calling net2string twice)
+        lines = []
         for i in range(self.net_list_length()):
-            string = self.net2string(i)
-            length = len(string.split())
-            if length < 5:
-                s = s + string + '\n'
-        return s
+            net_str = self.net2string(i)
+            if len(net_str.split()) < 5:
+                lines.append(net_str)
+        return '\n'.join(lines) + '\n' if lines else ''
 
     def net_list_title(self):
-        """Return net-list title as stirng
+        """Return net-list title as string
         """
         date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
         s = ''
@@ -345,20 +386,22 @@ class AllegroNetList(object):
         return s
 
     def net_list2file(self, fname='NetList.rpt', message_en=False):
+        # type: (str, bool) -> None
         """Write net-list data (with title to string) to file
-        Keyword Arguments:
-        fname -- output file name
+
+        Args:
+            fname: output file name
+            message_en: if True, log a message about the write operation
         """
         s = self.all_data2string()
-        f = open(fname, 'w')
-        f.write(s)
-        f.close()
+        with open(fname, 'w') as f:
+            f.write(s)
         if message_en:
-            print('Write Net-List report file: %s' % fname)
+            logger.info('Wrote Net-List report file: %s', fname)
 
     def net_list_info(self):
-        """Returns net-list info as string
-        """
+        # type: () -> str
+        """Returns net-list info as string"""
         return 'Net-list %s %s (version: %s)' % (self.date, self.time, self.version)
 
 

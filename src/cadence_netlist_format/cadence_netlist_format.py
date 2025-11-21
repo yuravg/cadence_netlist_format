@@ -201,6 +201,22 @@ class CadenceNetListFormat(Frame):
         self.log_text.config(state=DISABLED)
         self.log_message('Log cleared.')
 
+    def _open_with_system_app(self, path):
+        """Open a file or directory with the system's default application.
+
+        Args:
+            path: Path to file or directory to open
+
+        Raises:
+            Exception: If opening fails
+        """
+        if sys.platform == 'win32':
+            os.startfile(path)
+        elif sys.platform == 'darwin':  # macOS
+            subprocess.call(['open', path])
+        else:  # linux
+            subprocess.call(['xdg-open', path])
+
     def open_output_file(self):
         """Open the output report file"""
         output_path = os.path.join(os.getcwd(), self.output_fname)
@@ -212,12 +228,7 @@ class CadenceNetListFormat(Frame):
             return
 
         try:
-            if sys.platform == 'win32':
-                os.startfile(output_path)
-            elif sys.platform == 'darwin':  # macOS
-                subprocess.call(['open', output_path])
-            else:  # linux
-                subprocess.call(['xdg-open', output_path])
+            self._open_with_system_app(output_path)
             self.log_message(f'Opened output file: {output_path}')
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file:\n{str(e)}")
@@ -228,12 +239,7 @@ class CadenceNetListFormat(Frame):
         work_dir = os.getcwd()
 
         try:
-            if sys.platform == 'win32':
-                os.startfile(work_dir)
-            elif sys.platform == 'darwin':  # macOS
-                subprocess.call(['open', work_dir])
-            else:  # linux
-                subprocess.call(['xdg-open', work_dir])
+            self._open_with_system_app(work_dir)
             self.log_message(f'Opened output directory: {work_dir}')
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open directory:\n{str(e)}")
@@ -254,9 +260,8 @@ class CadenceNetListFormat(Frame):
 
     def write2file(self, fname, s):
         """write data to file"""
-        f = open(fname, 'w')
-        f.write(s)
-        f.close()
+        with open(fname, 'w') as f:
+            f.write(s)
 
 
 if __name__ == '__main__':
