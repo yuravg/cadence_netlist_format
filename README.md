@@ -1,9 +1,19 @@
-# Overview
+# Cadence Netlist Formatter
 
-Format Cadence Allegro Net-List (cnl - Cadence Net-List) to readable file
+A Python CLI tool that transforms Cadence Allegro netlist files (`.dat` format) into
+human-readable reports. Simplify circuit analysis by converting complex netlist data into an
+organized, easy-to-read format.
 
-Output example:
+## What It Does
 
+Converts Cadence Allegro netlist files into formatted reports showing nets with their connected
+components:
+
+**Input**: `pstxnet.dat` (Cadence netlist format)
+
+**Output**: `NetList.rpt` (human-readable report)
+
+Example output:
 ```
 ...
 +24V C7 2 L1 3 FU1 1 C19 2 Z6 1
@@ -12,42 +22,103 @@ RESET X1 29 R64 1 R131 8
 ...
 ```
 
+## Features
+
+- **GUI-based file selection** - Simple tkinter interface
+- **Smart config management** - Automatically saves your last file selection in the working directory (`.cnl_format.dat`)
+- **Auto-versioning** - Preserves old reports (NetList.rpt → NetList.rpt,0 → NetList.rpt,1)
+- **Cross-platform** - Works Windows and Linux
+- **Python 2.7+ compatible** - Supports both Python 2 and 3
+
+## Quick Start
+
+1. **Install**: `pip install cadence_netlist_format`
+2. **Run**: `cnl_format`
+3. **Format**: Select your netlist file and click "Format Netlist"
+
+![GUI Screenshot](./doc/gui.png)
+
+## Installation
+
+### Prerequisites
+- Python 2.7+ or Python 3.x
+- tkinter (usually included with Python)
+
+### Option 1: Install from Release
+
+Download the latest [release](https://github.com/yuravg/cadence_netlist_format/releases) and install:
+
+```bash
+pip install cadence_netlist_format-<version>.whl
+```
+
+### Option 2: Build and Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/yuravg/cadence_netlist_format.git
+cd cadence_netlist_format
+
+# Build the package
+make build
+
 # Install
+make install
+```
 
-install release or install from source
+Or manually:
+```bash
+pip install dist/cadence_netlist_format-<version>.whl
+```
 
-## Install release
+## Usage
 
-- download latest [release](https://github.com/yuravg/cadence_netlist_format/releases)
+### Running the Tool
 
-- install `pip install dist/cadence_netlist_format-<versoin>.whl`
+Launch the GUI from any directory:
 
-## Build and install from source
+```bash
+cnl_format
+```
 
-- Download source
+### Try the Examples
 
-- Build
+Test the tool with sample data:
 
-to build the Python package you need to run
+```bash
+cd examples/
+cnl_format  # Pre-configured to load pstxnet_v3.dat
+# Click "Format Netlist" to see it in action
+```
 
-`make build`
+## Development
 
-- Install
+For developers who want to contribute or modify the code:
 
-to install python package:
+### Build Commands
+```bash
+make build          # Build the wheel package
+make install        # Install from built wheel
+make pytest         # Run tests
+make coverage       # Run tests with coverage report
+```
 
-`make install`
+### Development Setup
+```bash
+pip install -e ".[dev]"  # Install in editable mode with dev dependencies
+```
 
-or
+### Testing
+- Test data: `tests/data/inputs/` (sample netlists)
+- Expected outputs: `tests/data/expected/` (reference files)
+- Manual testing: Use the `examples/` directory
 
-`pip install dist/cadence_netlist_format-<versoin>.whl`
+For detailed architecture and development guidelines, see `.claude/CLAUDE.md`.
 
-# Usage
+## License
 
-run at the command prompt:
+MIT License - See LICENSE file for details
 
-`cnl_format`
+## Repository
 
-Screenshot:
-
-![Screenshot](./doc/gui.png)
+[https://github.com/yuravg/cadence_netlist_format](https://github.com/yuravg/cadence_netlist_format)
