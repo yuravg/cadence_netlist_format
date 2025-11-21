@@ -72,14 +72,14 @@ class CadenceNetListFormat(Frame):
         action_frame = Frame(self)
         action_frame.pack(fill='x', pady=10)
 
-        Button(action_frame, text='Build Report', command=self.build,
+        Button(action_frame, text='Format Netlist', command=self.format_netlist,
                height=2, width=15, bg='#4CAF50', fg='white',
                font=('TkDefaultFont', 9, 'bold')).pack(side='left', padx=5)
 
         Button(action_frame, text='Open Output File', command=self.open_output_file,
                height=2, width=15).pack(side='left', padx=5)
 
-        Button(action_frame, text='Open Output Dir', command=self.open_output_dir,
+        Button(action_frame, text='Open Output Folder', command=self.open_output_dir,
                height=2, width=15).pack(side='left', padx=5)
 
         # Status and log section
@@ -126,8 +126,8 @@ class CadenceNetListFormat(Frame):
         self.update_gui2self()
         self.save_config()
 
-    def build(self):
-        """build formatted net-list"""
+    def format_netlist(self):
+        """format netlist into readable report"""
         # Validate input file
         if not self.cnl_fname or self.cnl_fname == '':
             messagebox.showerror("Error", "Please select a netlist file first.")
@@ -143,7 +143,7 @@ class CadenceNetListFormat(Frame):
 
         try:
             self.log_message('=' * 60)
-            self.log_message(f'Starting build at {datetime.datetime.now().strftime("%H:%M:%S")}')
+            self.log_message(f'Starting format at {datetime.datetime.now().strftime("%H:%M:%S")}')
             self.log_message(f'Input file: {self.cnl_fname}')
 
             # Parse netlist
@@ -166,10 +166,10 @@ class CadenceNetListFormat(Frame):
             self.log_message('=' * 60)
 
         except Exception as e:
-            error_msg = f'ERROR: Failed to build report: {str(e)}'
+            error_msg = f'ERROR: Failed to format netlist: {str(e)}'
             self.log_message(error_msg)
             self.log_message('=' * 60)
-            messagebox.showerror("Build Failed", f"An error occurred:\n\n{str(e)}")
+            messagebox.showerror("Format Failed", f"An error occurred:\n\n{str(e)}")
 
     def select_netlist(self):
         """GUI to select net-list"""
@@ -207,7 +207,7 @@ class CadenceNetListFormat(Frame):
 
         if not os.path.exists(output_path):
             messagebox.showwarning("File Not Found",
-                                 f"Output file does not exist yet:\n{output_path}\n\nPlease build the report first.")
+                                 f"Output file does not exist yet:\n{output_path}\n\nPlease format the netlist first.")
             self.log_message(f'Cannot open output file - file does not exist: {output_path}')
             return
 
