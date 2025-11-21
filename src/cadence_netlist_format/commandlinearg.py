@@ -3,14 +3,16 @@
 
 try:
     from argparse import ArgumentParser
-except ImportError:  # for version < 3.0
-    from ArgParse import ArgumentParser
+except ImportError:  # for version < 3.0 (though argparse is available in 2.7+)
+    # Note: argparse has been standard library since Python 2.7
+    # This fallback should never be needed for supported Python versions
+    from argparse import ArgumentParser
 
 from .__init__ import __version__
 
-__prog__ = "cln_format"
+__prog__ = "cnl_format"
 __description__ = "Format Cadence Allegro Net-List (cnl - Cadence Net-List) to readable file"
-__version_string__ = '%s version %s' % (__prog__, __version__)
+__version_string__ = '%s %s' % (__prog__, __version__)
 
 
 def get_args():

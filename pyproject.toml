@@ -23,6 +23,7 @@ dev = [
     "pytest-cov>=2.10; python_version >= '2.7'",
     "build>=0.7",
     "wheel",
+    "toml>=0.10.2",
 ]
 
 # This creates an executable command called 'cnl_format'
@@ -42,5 +43,13 @@ include = ["cadence_netlist_format*"]
 # Pytest configuration
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["test"]
-addopts = "-v"
+testpaths = ["tests"]
+addopts = "-v --strict-markers"
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for component interactions",
+    "regression: Regression tests against reference netlists",
+    "slow: Tests that take longer to execute",
+]
+# Minimum Python version for testing
+minversion = "4.6"
