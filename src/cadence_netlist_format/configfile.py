@@ -117,30 +117,28 @@ class ConfigFile(object):
         """
         return self.k[section][name]
 
-    # def del_key(self, id):
-    #     """Delete key from configuration files
-    #     Note: need usage method clear to delete from configuration file
-    #     """
-    #     print('Delete key: ' + str(id))
-    #     del self.k[str(id)]
-
-    # def clear(self):
-    #     """Delete all not assigned key and sections from configuration files
-    #     """
-    #     print('Clear configuration file: ' + str(self.fname))
-    #     config.clear()
-
     def write2file(self):
         """Write keys to configuration file
+
+        Returns:
+            bool: True if write succeeded, False otherwise
+
+        Raises:
+            IOError/OSError: If file write fails
         """
-        sections = self.config.sections()
-        for section in sorted(self.k):
-            if section not in sections:
-                self.config.add_section(section)
-            for i in sorted(self.k[section]):
-                self.config.set(section, i, self.k[section][i])
-        with open(self.fname, 'w') as configfile:
-            self.config.write(configfile)
+        try:
+            sections = self.config.sections()
+            for section in sorted(self.k):
+                if section not in sections:
+                    self.config.add_section(section)
+                for i in sorted(self.k[section]):
+                    self.config.set(section, i, self.k[section][i])
+            with open(self.fname, 'w') as configfile:
+                self.config.write(configfile)
+            return True
+        except (IOError, OSError) as e:
+            print('ERROR: Failed to write config file \'%s\': %s' % (self.fname, str(e)))
+            raise
 
     def __str__(self):
         s = 'File name: %s' % str(self.fname)
