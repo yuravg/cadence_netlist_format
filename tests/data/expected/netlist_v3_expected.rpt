@@ -5,7 +5,7 @@
 +-------------------------------------------------------------------------+
 | Cadence net-list file info:                                             |
 |  Net-list Mar-22-2016 10:54:51 (version: 16.3.0)
-|  ./files2self_test/pstxnet_smol3.dat
+|  ../tests/data/inputs/pstxnet_v3.dat
 +-------------------------------------------------------------------------+
 A16910366_0_XXX3 DA74 13 C74 6 R74 5 DA74 s3 DD12 33
 AVDDI_D_0_XXX5 R634 2 R636 2 R673 1

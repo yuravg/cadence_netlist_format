@@ -5,7 +5,7 @@
 +-------------------------------------------------------------------------+
 | Cadence net-list file info:                                             |
 |  Net-list Apr-26-2016 14:52:09 (version: 16.3.0)
-|  D:/HOME/packages_python/package/cadence_netlist_format/test/pstxnet.dat
+|  ../tests/data/inputs/pstxnet_v1.dat
 +-------------------------------------------------------------------------+
 +1V2 Z18 2 C43 2 X9 1 Z28 1 Z31 1
 +1V8 C51 2 X12 1 C49 2 R19 2 DA7 5 DA7 6 Z330 1 Z319 1 Z365 1 Z296 1 Z306 1 Z298 1 Z300 1 Z286 1 Z308 1 Z302 1 Z304 1 Z290 1 Z292 1 Z288 1 Z294 1
