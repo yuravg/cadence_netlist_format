@@ -475,7 +475,8 @@ class AllegroNetList(object):
         s = self.net_list_title() + '\n'
         s = s + self.net_list2string()
         s = s + self.single_net_warnings()
-        return s
+        # Add trailing newline (Unix convention)
+        return s + '\n'
 
     def net_list2file(self, fname='NetList.rpt', message_en=False):
         # type: (str, bool) -> None
