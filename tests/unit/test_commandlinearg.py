@@ -80,7 +80,7 @@ class TestCommandLineArgs:
         assert __version__ in __version_string__
 
         # Verify exact format
-        expected = '%s %s' % (__prog__, __version__)
+        expected = f'{__prog__} {__version__}'
         assert __version_string__ == expected
 
     def test_prog_name(self):
@@ -174,29 +174,21 @@ class TestArgumentParserConfiguration:
         assert hasattr(args, '__dict__')
 
 
-class TestPython2Compatibility:
-    """Test suite for Python 2/3 compatibility."""
+class TestModernPython:
+    """Test suite for modern Python 3.10+ features."""
 
     def test_argparse_import_available(self):
         """Test that ArgumentParser can be imported.
 
-        Should work in both Python 2.7+ and Python 3.x.
+        Standard library module in Python 3.10+.
         """
-        try:
-            from argparse import ArgumentParser
-            assert ArgumentParser is not None
-        except ImportError:
-            # Python 2.6 or earlier (not supported but test the fallback)
-            from ArgParse import ArgumentParser
-            assert ArgumentParser is not None
+        from argparse import ArgumentParser
+        assert ArgumentParser is not None
 
-    def test_version_string_formatting(self):
-        """Test that version string uses compatible string formatting.
-
-        Uses % formatting which works in both Python 2 and 3.
-        """
-        # Verify the format uses % style (not f-strings or .format())
-        assert '%s version %s' in str(__version_string__) or isinstance(__version_string__, str)
+    def test_version_string_is_string(self):
+        """Test that version string is a valid string type."""
+        assert isinstance(__version_string__, str)
+        assert len(__version_string__) > 0
 
 
 # Integration-style test

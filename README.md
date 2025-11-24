@@ -27,8 +27,8 @@ RESET X1 29 R64 1 R131 8
 - **GUI-based file selection** - Simple tkinter interface
 - **Smart config management** - Automatically saves your last file selection in the working directory (`.cnl_format.dat`)
 - **Auto-versioning** - Preserves old reports (NetList.rpt → NetList.rpt,0 → NetList.rpt,1)
-- **Cross-platform** - Works Windows and Linux
-- **Python 2.7+ compatible** - Supports both Python 2 and 3
+- **Cross-platform** - Works on Windows, macOS, and Linux
+- **Modern Python** - Requires Python 3.10+ with modern language features
 
 ## Quick Start
 
@@ -41,7 +41,7 @@ RESET X1 29 R64 1 R131 8
 ## Installation
 
 ### Prerequisites
-- Python 2.7+ or Python 3.x
+- Python 3.10 or later
 - tkinter (usually included with Python)
 
 ### Option 1: Install from Release

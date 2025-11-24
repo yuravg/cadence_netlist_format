@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cadence_netlist_format"
-version = "1.0.0"
+version = "2.0.0"
 description = "CLI to format Cadence Allegro Net-List to readable file"
 readme = "README.md"
-requires-python = ">=2.7"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [
     {name = "Yuriy VG", email = "yuravg@gmail.com"}
@@ -19,11 +19,11 @@ authors = [
 # Optional development dependencies
 [project.optional-dependencies]
 dev = [
-    "pytest>=4.6; python_version >= '2.7'",
-    "pytest-cov>=2.10; python_version >= '2.7'",
+    "pytest>=7.0",
+    "pytest-cov>=3.0",
     "build>=0.7",
     "wheel",
-    "toml>=0.10.2",
+    "tomli>=2.0.0; python_version >= '3.10' and python_version < '3.11'",
 ]
 
 # This creates an executable command called 'cnl_format'
@@ -52,4 +52,4 @@ markers = [
     "slow: Tests that take longer to execute",
 ]
 # Minimum Python version for testing
-minversion = "4.6"
+minversion = "7.0"

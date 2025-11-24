@@ -3,32 +3,28 @@
 """Format Cadence Allegro Net-List file (cnl - Cadence Let-List) to readable view
 """
 
-import os
-import sys
+from __future__ import annotations
 import datetime
 import subprocess
-try:
-    from tkinter import Frame, Label, Button, StringVar, Entry, Text, Scrollbar
-    from tkinter import messagebox, END, DISABLED, NORMAL, WORD
-    from tkinter.ttk import Separator, Style
-    from tkinter.filedialog import askopenfilename
-except ImportError:  # for version < 3.0
-    from Tkinter import Frame, Label, Button, StringVar, Entry, Text, Scrollbar
-    from Tkinter import END, DISABLED, NORMAL, WORD
-    import tkMessageBox as messagebox
-    from tkFileDialog import askopenfilename
+import sys
+from pathlib import Path
+from tkinter import Frame, Label, Button, StringVar, Entry, Text, Scrollbar
+from tkinter import messagebox, END, DISABLED, NORMAL, WORD
+from tkinter.filedialog import askopenfilename
+from typing import Optional
+
 from .configfile import ConfigFile
 from .allegronetlist import AllegroNetList
 
 
 class CadenceNetListFormat(Frame):
-    """Format Cadence Allegro net-list file (cnl - Cadence net-list) to human readable view
-    """
+    """Format Cadence Allegro net-list file (cnl - Cadence net-list) to human readable view"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         Frame.__init__(self, parent)
-        self.cnl_fname = None
-        self.output_fname = 'NetList.rpt'
+        self.cnl_fname: Optional[str] = None
+        self.output_fname: str = 'NetList.rpt'
+        self.cfg: Optional[ConfigFile] = None
         self.read_config_file()
         self.master.title("Cadence Allegro Net-List Formatter")
         self.master.geometry("700x500")
@@ -36,7 +32,7 @@ class CadenceNetListFormat(Frame):
         self.pack(fill='both', expand=True, padx=10, pady=10)
         self.make_widgets()
 
-    def read_config_file(self):
+    def read_config_file(self) -> None:
         """Read configuration file with error handling and fallback to defaults"""
         k = {'Configuration': {'netlist_file': ''},
              'Info': {'Description': 'Configuration file to Format Cadence Allegro net-list file'}}
@@ -45,11 +41,11 @@ class CadenceNetListFormat(Frame):
             self.cnl_fname = self.cfg.get_key('Configuration', 'netlist_file')
         except (IOError, OSError, KeyError) as e:
             # Config file is corrupted or unreadable - fall back to defaults
-            print('Warning: Cannot read config file, using defaults: {}'.format(str(e)))
+            print(f'Warning: Cannot read config file, using defaults: {e}')
             self.cfg = None
             self.cnl_fname = ''
 
-    def save_config(self):
+    def save_config(self) -> None:
         """Save settings to configuration file"""
         if self.cfg is None:
             # Config was not loaded successfully, skip saving
@@ -59,9 +55,9 @@ class CadenceNetListFormat(Frame):
             self.cfg.write2file()
         except (IOError, OSError) as e:
             # Silently fail if we can't save config - not critical
-            print('Warning: Failed to save config file: {}'.format(str(e)))
+            print(f'Warning: Failed to save config file: {e}')
 
-    def make_widgets(self):
+    def make_widgets(self) -> None:
         """making main widgets"""
         # Input file section
         input_frame = Frame(self)
@@ -126,20 +122,20 @@ class CadenceNetListFormat(Frame):
         # Initial log message
         self.log_message('Ready. Please select a netlist file to begin.')
 
-    def update_gui2self(self):
+    def update_gui2self(self) -> None:
         """update from GUI to self data"""
         self.cnl_fname = self.gui_cnl_fname.get()
 
-    def update_self2gui(self):
+    def update_self2gui(self) -> None:
         """update form self data to GUI"""
         self.gui_cnl_fname.set(self.cnl_fname)
 
-    def update_and_save_config(self):
+    def update_and_save_config(self) -> None:
         """update data and save config"""
         self.update_gui2self()
         self.save_config()
 
-    def format_netlist(self):
+    def format_netlist(self) -> None:
         """format netlist into readable report"""
         # Validate input file
         if not self.cnl_fname or self.cnl_fname == '':
@@ -147,21 +143,23 @@ class CadenceNetListFormat(Frame):
             self.log_message('ERROR: No netlist file selected.')
             return
 
-        if not os.path.exists(self.cnl_fname):
+        file_path = Path(self.cnl_fname)
+
+        if not file_path.exists():
             messagebox.showerror("Error", f"File not found:\n{self.cnl_fname}")
             self.log_message(f'ERROR: File not found: {self.cnl_fname}')
             return
 
         # Additional validation: check if it's a directory
-        if os.path.isdir(self.cnl_fname):
+        if file_path.is_dir():
             messagebox.showerror("Error", f"Path is a directory, not a file:\n{self.cnl_fname}")
             self.log_message(f'ERROR: Path is a directory: {self.cnl_fname}')
             return
 
         # Check if file is readable
-        if not os.access(self.cnl_fname, os.R_OK):
-            messagebox.showerror("Error", f"File is not readable (permission denied):\n{self.cnl_fname}")
-            self.log_message(f'ERROR: Cannot read file (permission denied): {self.cnl_fname}')
+        if not file_path.is_file():
+            messagebox.showerror("Error", f"Path is not a regular file:\n{self.cnl_fname}")
+            self.log_message(f'ERROR: Path is not a regular file: {self.cnl_fname}')
             return
 
         # Basic format validation: check if file starts with expected header
@@ -194,8 +192,8 @@ class CadenceNetListFormat(Frame):
             fname = self.output_fname
             self.write2newfile(fname, s)
 
-            work_dir = os.getcwd()
-            output_path = os.path.join(work_dir, fname)
+            work_dir = Path.cwd()
+            output_path = work_dir / fname
 
             self.log_message(f'SUCCESS: Report written to: {output_path}')
             self.log_message(f'Completed at {datetime.datetime.now().strftime("%H:%M:%S")}')
@@ -218,7 +216,7 @@ class CadenceNetListFormat(Frame):
             self.log_message('=' * 60)
             messagebox.showerror("Unexpected Error", f"An unexpected error occurred:\n\n{str(e)}\n\nPlease report this issue.")
 
-    def select_netlist(self):
+    def select_netlist(self) -> None:
         """GUI to select net-list"""
         fname = askopenfilename(filetypes=(("Cadence netlist", "pstxnet.dat"),
                                            ("All files", "*.*")))
@@ -227,13 +225,12 @@ class CadenceNetListFormat(Frame):
             self.update_self2gui()
             self.log_message(f'Selected input file: {fname}')
 
-    def save_and_exit(self):
-        """save configuration data and exit
-        """
+    def save_and_exit(self) -> None:
+        """save configuration data and exit"""
         self.update_and_save_config()
         self.quit()
 
-    def log_message(self, message):
+    def log_message(self, message: str) -> None:
         """Add message to log text widget"""
         self.log_text.config(state=NORMAL)
         self.log_text.insert(END, message + '\n')
@@ -241,14 +238,14 @@ class CadenceNetListFormat(Frame):
         self.log_text.config(state=DISABLED)
         self.update_idletasks()  # Update GUI immediately
 
-    def clear_log(self):
+    def clear_log(self) -> None:
         """Clear the log text widget"""
         self.log_text.config(state=NORMAL)
         self.log_text.delete(1.0, END)
         self.log_text.config(state=DISABLED)
         self.log_message('Log cleared.')
 
-    def _open_with_system_app(self, path):
+    def _open_with_system_app(self, path: str | Path) -> None:
         """Open a file or directory with the system's default application.
 
         Args:
@@ -258,25 +255,28 @@ class CadenceNetListFormat(Frame):
             OSError: If opening fails (command not found, permission denied, etc.)
         """
         try:
-            if sys.platform == 'win32':
-                os.startfile(path)
-            elif sys.platform == 'darwin':  # macOS
-                ret = subprocess.call(['open', path])
-                if ret != 0:
-                    raise OSError('open command failed with return code {}'.format(ret))
-            else:  # linux
-                ret = subprocess.call(['xdg-open', path])
-                if ret != 0:
-                    raise OSError('xdg-open command failed with return code {}'.format(ret))
+            path_str = str(path)
+            match sys.platform:
+                case 'win32':
+                    import os
+                    os.startfile(path_str)
+                case 'darwin':  # macOS
+                    ret = subprocess.call(['open', path_str])
+                    if ret != 0:
+                        raise OSError(f'open command failed with return code {ret}')
+                case _:  # linux and other Unix-like systems
+                    ret = subprocess.call(['xdg-open', path_str])
+                    if ret != 0:
+                        raise OSError(f'xdg-open command failed with return code {ret}')
         except OSError as e:
             # Handle case where command doesn't exist
-            raise OSError('Failed to open with system application: {}'.format(str(e)))
+            raise OSError(f'Failed to open with system application: {e}')
 
-    def open_output_file(self):
+    def open_output_file(self) -> None:
         """Open the output report file"""
-        output_path = os.path.join(os.getcwd(), self.output_fname)
+        output_path = Path.cwd() / self.output_fname
 
-        if not os.path.exists(output_path):
+        if not output_path.exists():
             messagebox.showwarning("File Not Found",
                                  f"Output file does not exist yet:\n{output_path}\n\nPlease format the netlist first.")
             self.log_message(f'Cannot open output file - file does not exist: {output_path}')
@@ -286,21 +286,21 @@ class CadenceNetListFormat(Frame):
             self._open_with_system_app(output_path)
             self.log_message(f'Opened output file: {output_path}')
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to open file:\n{str(e)}")
-            self.log_message(f'ERROR: Failed to open output file: {str(e)}')
+            messagebox.showerror("Error", f"Failed to open file:\n{e}")
+            self.log_message(f'ERROR: Failed to open output file: {e}')
 
-    def open_output_dir(self):
+    def open_output_dir(self) -> None:
         """Open the output directory in file manager"""
-        work_dir = os.getcwd()
+        work_dir = Path.cwd()
 
         try:
             self._open_with_system_app(work_dir)
             self.log_message(f'Opened output directory: {work_dir}')
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to open directory:\n{str(e)}")
-            self.log_message(f'ERROR: Failed to open directory: {str(e)}')
+            messagebox.showerror("Error", f"Failed to open directory:\n{e}")
+            self.log_message(f'ERROR: Failed to open directory: {e}')
 
-    def write2newfile(self, fname, s):
+    def write2newfile(self, fname: str | Path, s: str) -> None:
         """Write data to file with two-phase commit to prevent data loss.
 
         Uses atomic write pattern:
@@ -313,51 +313,52 @@ class CadenceNetListFormat(Frame):
             fname: Target filename
             s: Data to write
         """
-        temp_fname = fname + '.tmp'
-        old_fname = None
+        file_path = Path(fname)
+        temp_path = file_path.with_suffix(file_path.suffix + '.tmp')
+        old_path: Optional[Path] = None
 
         try:
             # Phase 1: Write to temporary file
-            self.write2file(temp_fname, s)
+            self.write2file(temp_path, s)
 
             # Phase 2: Rename old file if it exists
-            if os.path.exists(fname):
+            if file_path.exists():
                 for i in range(100):
-                    backup_fname = '%s,%s' % (fname, i)
-                    if not os.path.exists(backup_fname):
-                        os.rename(fname, backup_fname)
-                        old_fname = backup_fname
-                        self.log_message(f'Renamed old file to: {backup_fname}')
+                    backup_path = Path(f'{fname},{i}')
+                    if not backup_path.exists():
+                        file_path.rename(backup_path)
+                        old_path = backup_path
+                        self.log_message(f'Renamed old file to: {backup_path}')
                         break
                 else:
                     # Reached max backups, cleanup temp and raise error
-                    os.remove(temp_fname)
+                    temp_path.unlink()
                     raise IOError('Too many backup files (100+). Please clean up old backups.')
 
             # Phase 3: Rename temp file to target name
-            os.rename(temp_fname, fname)
+            temp_path.rename(file_path)
 
         except (IOError, OSError) as e:
             # Rollback: Try to restore old file if we renamed it
-            if old_fname and os.path.exists(old_fname) and not os.path.exists(fname):
+            if old_path and old_path.exists() and not file_path.exists():
                 try:
-                    os.rename(old_fname, fname)
-                    self.log_message(f'ERROR: Write failed, restored original file: {str(e)}')
+                    old_path.rename(file_path)
+                    self.log_message(f'ERROR: Write failed, restored original file: {e}')
                 except (IOError, OSError):
-                    self.log_message(f'CRITICAL: Write failed AND could not restore original file: {str(e)}')
+                    self.log_message(f'CRITICAL: Write failed AND could not restore original file: {e}')
             else:
-                self.log_message(f'ERROR: Write operation failed: {str(e)}')
+                self.log_message(f'ERROR: Write operation failed: {e}')
 
             # Clean up temp file if it exists
-            if os.path.exists(temp_fname):
+            if temp_path.exists():
                 try:
-                    os.remove(temp_fname)
+                    temp_path.unlink()
                 except (IOError, OSError):
                     pass
 
             raise  # Re-raise the exception for caller to handle
 
-    def write2file(self, fname, s):
+    def write2file(self, fname: str | Path, s: str) -> None:
         """write data to file"""
         with open(fname, 'w') as f:
             f.write(s)

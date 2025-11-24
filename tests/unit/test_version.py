@@ -5,8 +5,14 @@ Tests that the package version is correctly exposed and matches pyproject.toml.
 """
 
 import pytest
-import toml
+import sys
 from pathlib import Path
+
+# Use built-in tomllib for Python 3.11+, fallback to tomli for older versions
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 @pytest.mark.unit
@@ -28,7 +34,8 @@ def test_version_matches_pyproject():
 
     assert pyproject_path.exists(), "pyproject.toml not found"
 
-    pyproject_data = toml.load(pyproject_path)
+    with open(pyproject_path, 'rb') as f:
+        pyproject_data = tomllib.load(f)
     expected_version = pyproject_data["project"]["version"]
 
     # Compare versions

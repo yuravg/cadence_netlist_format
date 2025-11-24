@@ -3,53 +3,54 @@
 """Get data from Cadence Allegro net-list
 """
 
-from __future__ import print_function
+from __future__ import annotations
 import datetime
 import logging
+from pathlib import Path
+from typing import Optional
 
-__version__ = '1.0'
+__version__ = '2.0'
 
 # Configure module logger
 logger = logging.getLogger(__name__)
 
 
-class AllegroNetList(object):
+class AllegroNetList:
     """Cadence Allegro net-list data
 
-    Arguments:
-    date/time -- date/time of create net-list
-    version   -- version of Cadence Allegro net-list
-    net_list  -- net-list data
-                    [['net_name1', [['D1', '1'], ['C1', '1']]],
-                     ['net_name2', [['D2', '2'], ['R2', '2']]]]
-    fname     -- net-list file name
-    refdes_list -- list of pins and nets belong refdes
-                (to build list need run method: build_refdes_list(REFDES)
-                    [['REFDES0',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
-                     ['REFDES1',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
-                     ['REFDESN',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']]]
+    Attributes:
+        date: Date of create net-list
+        time: Time of create net-list
+        version: Version of Cadence Allegro net-list
+        net_list: Net-list data [['net_name1', [['D1', '1'], ['C1', '1']]],
+                                  ['net_name2', [['D2', '2'], ['R2', '2']]]]
+        fname: Net-list file name
+        refdes_list: List of pins and nets belong refdes
+                     [['REFDES0',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
+                      ['REFDES1',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
+                      ['REFDESN',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']]]
+        refdes_dict: Performance index for O(1) refdes lookup
+        pin_name_index: Performance index for O(1) (refdes, pin) -> pin_name lookup
     """
 
-    def __init__(self, fname):
-        # type: (str) -> None
+    def __init__(self, fname: str | Path) -> None:
         """Get data from net-list (read from file)
 
         Args:
             fname: Path to the netlist file
         """
         # Initialize instance attributes (not class attributes)
-        self.net_list = []  # type: list
-        self.date = 0  # type: int
-        self.time = 0  # type: int
-        self.version = 0  # type: int
-        self.refdes_list = []  # type: list
-        self.refdes_dict = {}  # type: dict - Performance: O(1) lookup for refdes
-        self.pin_name_index = {}  # type: dict - Performance: O(1) lookup for (refdes, pin) -> pin_name
-        self.fname = fname  # type: str
+        self.net_list: list = []
+        self.date: int | str = 0
+        self.time: int | str = 0
+        self.version: int | str = 0
+        self.refdes_list: list = []
+        self.refdes_dict: dict[str, int] = {}  # Performance: O(1) lookup for refdes
+        self.pin_name_index: dict[tuple[str, str], str] = {}  # Performance: O(1) lookup for (refdes, pin) -> pin_name
+        self.fname: str = str(fname)
         self.read_file(fname)
 
-    def read_file(self, fname):
-        # type: (str) -> None
+    def read_file(self, fname: str | Path) -> None:
         """Read and parse netlist data from file.
 
         The parser is a state machine that processes:
@@ -71,18 +72,17 @@ class AllegroNetList(object):
 
         # Security: Check file size before reading to prevent memory exhaustion
         try:
-            import os
-            file_size = os.path.getsize(fname)
+            file_path = Path(fname)
+            file_size = file_path.stat().st_size
             if file_size > MAX_FILE_SIZE:
-                error_msg = 'File size ({:.2f} MB) exceeds maximum allowed size ({:.2f} MB)'.format(
-                    file_size / (1024.0 * 1024.0),
-                    MAX_FILE_SIZE / (1024.0 * 1024.0)
-                )
+                file_size_mb = file_size / (1024.0 * 1024.0)
+                max_size_mb = MAX_FILE_SIZE / (1024.0 * 1024.0)
+                error_msg = f'File size ({file_size_mb:.2f} MB) exceeds maximum allowed size ({max_size_mb:.2f} MB)'
                 logger.error(error_msg)
                 raise ValueError(error_msg)
-            logger.info('File size: {:.2f} MB'.format(file_size / (1024.0 * 1024.0)))
+            logger.info(f'File size: {file_size / (1024.0 * 1024.0):.2f} MB')
         except OSError as e:
-            logger.error('Cannot check file size for \'%s\': %s', fname, str(e))
+            logger.error(f"Cannot check file size for '{fname}': {e}")
             raise
 
         try:
@@ -171,16 +171,16 @@ class AllegroNetList(object):
 
                     except (IndexError, KeyError) as e:
                         parse_error_count += 1
-                        logger.warning('Error parsing net-list data (error #%d): %s', parse_error_count, str(e))
+                        logger.warning(f'Error parsing net-list data (error #{parse_error_count}): {e}')
                         # Check if too many errors have occurred
                         if parse_error_count >= MAX_PARSE_ERRORS:
-                            error_msg = 'Too many parsing errors ({} errors). File may be corrupted or not a valid netlist.'.format(parse_error_count)
+                            error_msg = f'Too many parsing errors ({parse_error_count} errors). File may be corrupted or not a valid netlist.'
                             logger.error(error_msg)
                             raise ValueError(error_msg)
 
                 # Parsing complete - report statistics
                 if parse_error_count > 0:
-                    logger.warning('Parsing completed with %d errors. Results may be incomplete.', parse_error_count)
+                    logger.warning(f'Parsing completed with {parse_error_count} errors. Results may be incomplete.')
 
                 # Sort nets alphabetically
                 self.net_list.sort()
@@ -200,16 +200,14 @@ class AllegroNetList(object):
                             self.pin_name_index[(refdes, pin)] = name
 
         except (IOError, OSError) as e:
-            logger.error('Cannot read file \'%s\': %s', fname, str(e))
+            logger.error(f"Cannot read file '{fname}': {e}")
             raise
 
-    def net_list_length(self):
-        # type: () -> int
+    def net_list_length(self) -> int:
         """Returns length of net-list"""
         return len(self.net_list)
 
-    def check_net_index(self, i):
-        # type: (int) -> bool
+    def check_net_index(self, i: int) -> bool:
         """Check valid net-list index (to get net name)
 
         Args:
@@ -223,17 +221,16 @@ class AllegroNetList(object):
         """
         # Input validation: ensure i is an integer
         if not isinstance(i, int):
-            raise TypeError('Index must be an integer, got {}'.format(type(i).__name__))
+            raise TypeError(f'Index must be an integer, got {type(i).__name__}')
 
         length = self.net_list_length()
         if i < 0 or i >= length:
-            logger.error('Invalid net index %d (valid range: 0 to %d)', i, length-1)
+            logger.error(f'Invalid net index {i} (valid range: 0 to {length-1})')
             return False
         else:
             return True
 
-    def net_name(self, i):
-        # type: (int) -> str
+    def net_name(self, i: int) -> Optional[str]:
         """Returns net name from net-list
 
         Args:
@@ -248,10 +245,14 @@ class AllegroNetList(object):
         else:
             return None
 
-    def node_list(self, i):
+    def node_list(self, i: int) -> Optional[list]:
         """Returns refdes and pin list from net-list
-        Keyword Arguments:
-        i -- net name index
+
+        Args:
+            i: net name index
+
+        Returns:
+            List of nodes or None if index is invalid
         """
         if self.check_net_index(i):
             node = []
@@ -263,7 +264,7 @@ class AllegroNetList(object):
         else:
             return None
 
-    def get_refdes_pin_name(self, p_refdes, p_pin):
+    def get_refdes_pin_name(self, p_refdes: str, p_pin: str) -> Optional[str]:
         """Return refdes pin name as string
 
         Args:
@@ -271,7 +272,7 @@ class AllegroNetList(object):
             p_pin: Pin number (e.g., 'G3')
 
         Returns:
-            str: Pin name if found, None otherwise
+            Pin name if found, None otherwise
 
         Raises:
             TypeError: If p_refdes or p_pin is not a string
@@ -280,21 +281,21 @@ class AllegroNetList(object):
         """
         # Input validation
         if not isinstance(p_refdes, str):
-            raise TypeError('p_refdes must be a string, got {}'.format(type(p_refdes).__name__))
+            raise TypeError(f'p_refdes must be a string, got {type(p_refdes).__name__}')
         if not isinstance(p_pin, str):
-            raise TypeError('p_pin must be a string, got {}'.format(type(p_pin).__name__))
+            raise TypeError(f'p_pin must be a string, got {type(p_pin).__name__}')
 
         # Use O(1) dictionary lookup instead of nested loops
         return self.pin_name_index.get((p_refdes, p_pin), None)
 
-    def node2string(self, i):
+    def node2string(self, i: int) -> Optional[str]:
         """Returns node (refdes, pin) as string
 
         Args:
             i: net name index
 
         Returns:
-            str: Node string if valid index, None otherwise
+            Node string if valid index, None otherwise
         """
         node_list = self.node_list(i)
         if node_list is None:
@@ -303,28 +304,28 @@ class AllegroNetList(object):
         node_strings = [' '.join(node_entry) for node_entry in node_list]
         return ' '.join(node_strings)
 
-    def find_in_refdes_list(self, refdes):
+    def find_in_refdes_list(self, refdes: str) -> bool:
         """Find refdes in refdes list
 
         Args:
             refdes: refdes value
 
         Returns:
-            bool: True if refdes is found in refdes_list, False otherwise
+            True if refdes is found in refdes_list, False otherwise
 
         Performance: O(1) lookup using dictionary index
         """
         return refdes in self.refdes_dict
 
-    def build_refdes_list(self, refdes):
+    def build_refdes_list(self, refdes: str) -> bool:
         """Build list of nets and pins belong of refdes - refdes list
 
         Args:
             refdes: refdes value
 
         Returns:
-            bool: True if refdes was found and added to refdes list,
-                  False if refdes was not found in net-list
+            True if refdes was found and added to refdes list,
+            False if refdes was not found in net-list
         """
         refdes_list = [refdes]
         find_net = 0
@@ -344,10 +345,10 @@ class AllegroNetList(object):
         if find_net:
             return True
         else:
-            logger.error('Cannot find refdes \'%s\' in net-list: %s', refdes, self.fname)
+            logger.error(f"Cannot find refdes '{refdes}' in net-list: {self.fname}")
             return False
 
-    def get_net_name4refdes_pin(self, refdes, pin):
+    def get_net_name4refdes_pin(self, refdes: str, pin: str) -> Optional[str]:
         """Returns net name for refdes and pin
 
         Args:
@@ -355,7 +356,7 @@ class AllegroNetList(object):
             pin: pin number
 
         Returns:
-            str: Net name if found, None otherwise
+            Net name if found, None otherwise
         """
         for i in self.refdes_list:
             if i[0] == refdes:
@@ -365,36 +366,36 @@ class AllegroNetList(object):
                         return j[0]
         return None
 
-    def refdes_list2string(self, refdes):
+    def refdes_list2string(self, refdes: str) -> Optional[str]:
         """Returns refdes_list (for selected refdes) as string
 
         Args:
             refdes: refdes value
 
         Returns:
-            str: Refdes list as string if found, None otherwise
+            Refdes list as string if found, None otherwise
         """
         if self.find_in_refdes_list(refdes):
             s = ''
             for i in self.refdes_list:
                 if i[0] == refdes:
-                    s = '%s' % i[0]
+                    s = f'{i[0]}'
                     net_pin = i[1:]
                     for j in net_pin:
-                        s = '%s %s:%s' % (s, j[0], j[1])
+                        s = f'{s} {j[0]}:{j[1]}'
             return s
         else:
-            logger.error('Cannot find refdes \'%s\' in refdes list', refdes)
+            logger.error(f"Cannot find refdes '{refdes}' in refdes list")
             return None
 
-    def net2string(self, i):
+    def net2string(self, i: int) -> Optional[str]:
         """Returns full net as string (net name and her refdes and pins)
 
         Args:
             i: net name index
 
         Returns:
-            str: Net as string if valid index, None otherwise
+            Net as string if valid index, None otherwise
         """
         net = self.net_name(i)
         if net is None:
@@ -402,28 +403,25 @@ class AllegroNetList(object):
         node = self.node2string(i)
         if node is None:
             return None
-        net_and_node = '%s %s' % (net, node)
+        net_and_node = f'{net} {node}'
         return net_and_node
 
-    def __str__(self):
-        """Returns net-list as string
-        """
+    def __str__(self) -> str:
+        """Returns net-list as string"""
         # Optimize: use join instead of string concatenation in loop, filter out None values
         lines = [self.net2string(i) for i in range(self.net_list_length())]
         lines = [line for line in lines if line is not None]
         return '\n'.join(lines)
 
-    def net_list2string(self):
-        """Return net-list data as string
-        """
+    def net_list2string(self) -> str:
+        """Return net-list data as string"""
         # Optimize: use join instead of string concatenation in loop, filter out None values
         lines = [self.net2string(i) for i in range(self.net_list_length())]
         lines = [line for line in lines if line is not None]
         return '\n'.join(lines) + '\n'
 
-    def single_net_list2string(self):
-        """Return single net-list data as string
-        """
+    def single_net_list2string(self) -> str:
+        """Return single net-list data as string"""
         # Optimize: use join with list comprehension, filter out None values
         lines = []
         for i in range(self.net_list_length()):
@@ -432,27 +430,25 @@ class AllegroNetList(object):
                 lines.append(net_str)
         return '\n'.join(lines) + '\n' if lines else ''
 
-    def net_list_title(self):
-        """Return net-list title as string
-        """
-        date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+    def net_list_title(self) -> str:
+        """Return net-list title as string"""
+        date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # Optimize: use list and join instead of string concatenation
         lines = [
             '+-------------------------------------------------------------------------+',
             '| File contains Cadence PCB Editor netlist                                |',
             '| NOTE: this file was auto-generated                                      |',
-            '| generation date, time: %s                              |' % date,
+            f'| generation date, time: {date}                              |',
             '+-------------------------------------------------------------------------+',
             '| Cadence net-list file info:                                             |',
-            '|  %s' % (self.net_list_info()),
-            '|  %s' % (self.fname),
+            f'|  {self.net_list_info()}',
+            f'|  {self.fname}',
             '+-------------------------------------------------------------------------+'
         ]
         return '\n'.join(lines)
 
-    def single_net_warnings(self):
-        """Return single net warning as string
-        """
+    def single_net_warnings(self) -> str:
+        """Return single net warning as string"""
         # Optimize: use list and join instead of string concatenation
         lines = [
             '',
@@ -469,17 +465,15 @@ class AllegroNetList(object):
             lines.append(w_string)
         return '\n'.join(lines)
 
-    def all_data2string(self):
-        """Return all net-list data (tilte, data, warnings) as string
-        """
+    def all_data2string(self) -> str:
+        """Return all net-list data (title, data, warnings) as string"""
         s = self.net_list_title() + '\n'
         s = s + self.net_list2string()
         s = s + self.single_net_warnings()
         # Add trailing newline (Unix convention)
         return s + '\n'
 
-    def net_list2file(self, fname='NetList.rpt', message_en=False):
-        # type: (str, bool) -> None
+    def net_list2file(self, fname: str | Path = 'NetList.rpt', message_en: bool = False) -> None:
         """Write net-list data (with title to string) to file
 
         Args:
@@ -487,23 +481,22 @@ class AllegroNetList(object):
             message_en: if True, log a message about the write operation
 
         Raises:
-            IOError/OSError: If file write fails (permission denied, disk full, etc.)
+            IOError: If file write fails (permission denied, disk full, etc.)
         """
         try:
             s = self.all_data2string()
             with open(fname, 'w') as f:
                 f.write(s)
             if message_en:
-                logger.info('Wrote Net-List report file: %s', fname)
+                logger.info(f'Wrote Net-List report file: {fname}')
         except (IOError, OSError) as e:
-            error_msg = 'Failed to write output file \'{}\': {}'.format(fname, str(e))
+            error_msg = f"Failed to write output file '{fname}': {e}"
             logger.error(error_msg)
             raise IOError(error_msg)
 
-    def net_list_info(self):
-        # type: () -> str
+    def net_list_info(self) -> str:
         """Returns net-list info as string"""
-        return 'Net-list %s %s (version: %s)' % (self.date, self.time, self.version)
+        return f'Net-list {self.date} {self.time} (version: {self.version})'
 
 
 if __name__ == '__main__':
@@ -515,14 +508,14 @@ if __name__ == '__main__':
         sys.exit(1)
 
     fname = sys.argv[1]
-    print('Parsing netlist file: {}'.format(fname))
+    print(f'Parsing netlist file: {fname}')
     try:
         netlist = AllegroNetList(fname)
-        print('\nNetlist info: {}'.format(netlist.net_list_info()))
-        print('Total nets: {}'.format(netlist.net_list_length()))
+        print(f'\nNetlist info: {netlist.net_list_info()}')
+        print(f'Total nets: {netlist.net_list_length()}')
         print('\nFirst 5 nets:')
         for i in range(min(5, netlist.net_list_length())):
-            print('  {}'.format(netlist.net2string(i)))
+            print(f'  {netlist.net2string(i)}')
     except Exception as e:
-        print('ERROR: {}'.format(str(e)))
+        print(f'ERROR: {e}')
         sys.exit(1)

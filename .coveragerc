@@ -31,7 +31,7 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run
     if __name__ == .__main__.:
 
-    # Don't complain about Python 2/3 compatibility code
+    # Don't complain about Python version checks
     if sys.version_info
 
 [html]
