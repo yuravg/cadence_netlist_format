@@ -89,7 +89,7 @@ class TestCommandLineArgs:
 
     def test_description(self):
         """Test that program description is correctly set."""
-        expected_desc = "Format Cadence Allegro Net-List (cnl - Cadence Net-List) to readable file"
+        expected_desc = "Format Cadence Allegro Netlist (cnl - Cadence Net List) to readable file"
         assert __description__ == expected_desc
 
     def test_get_args_help_flag(self, monkeypatch, capsys):

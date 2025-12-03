@@ -6,7 +6,7 @@ from argparse import ArgumentParser, Namespace
 from .__init__ import __version__
 
 __prog__ = "cnl_format"
-__description__ = "Format Cadence Allegro Net-List (cnl - Cadence Net-List) to readable file"
+__description__ = "Format Cadence Allegro Netlist (cnl - Cadence Net List) to readable file"
 __version_string__ = f'{__prog__} {__version__}'
 
 

@@ -3,8 +3,8 @@
 | NOTE: this file was auto-generated                                      |
 | generation date, time: 2016-12-06 12:13:42                              |
 +-------------------------------------------------------------------------+
-| Cadence net-list file info:                                             |
-|  Net-list Apr-26-2016 14:52:09 (version: 16.3.0)
+| Cadence Netlist file info:                                             |
+|  Netlist Apr-26-2016 14:52:09 (version: 16.3.0)
 |  ../tests/data/inputs/pstxnet_v1.dat
 +-------------------------------------------------------------------------+
 +1V2 Z18 2 C43 2 X9 1 Z28 1 Z31 1

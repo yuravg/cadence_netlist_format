@@ -1,15 +1,15 @@
 # Cadence Netlist Formatter
 
-A Python CLI tool that transforms Cadence Allegro netlist files (`.dat` format) into
-human-readable reports. Simplify circuit analysis by converting complex netlist data into an
+A Python CLI tool that transforms Cadence Allegro Netlist files (`.dat` format) into
+human-readable reports. Simplify circuit analysis by converting complex Netlist data into an
 organized, easy-to-read format.
 
 ## What It Does
 
-Converts Cadence Allegro netlist files into formatted reports showing nets with their connected
+Converts Cadence Allegro Netlist files into formatted reports showing nets with their connected
 components:
 
-**Input**: `pstxnet.dat` (Cadence netlist format)
+**Input**: `pstxnet.dat` (Cadence Netlist format)
 
 **Output**: `NetList.rpt` (human-readable report)
 
@@ -33,7 +33,7 @@ RESET X1 29 R64 1 R131 8
 ## Quick Start
 
 1. **Install**: `pip install cadence_netlist_format`
-2. **Run**: `cnl_format`
+2. **Run**: `cnl_format` (Cadence Net List Format)
 3. **Format**: Select your netlist file and click "Format Netlist"
 
 ![GUI Screenshot](./doc/gui.png)

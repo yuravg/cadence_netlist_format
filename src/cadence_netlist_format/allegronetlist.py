@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Get data from Cadence Allegro net-list
+"""Get data from Cadence Allegro Netlist
 """
 
 from __future__ import annotations
@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class AllegroNetList:
-    """Cadence Allegro net-list data
+    """Cadence Allegro Netlist data
 
     Attributes:
-        date: Date of create net-list
-        time: Time of create net-list
-        version: Version of Cadence Allegro net-list
-        net_list: Net-list data [['net_name1', [['D1', '1'], ['C1', '1']]],
+        date: Date of create Netlist
+        time: Time of create Netlist
+        version: Version of Cadence Allegro Netlist
+        net_list: Netlist data [['net_name1', [['D1', '1'], ['C1', '1']]],
                                   ['net_name2', [['D2', '2'], ['R2', '2']]]]
-        fname: Net-list file name
+        fname: Netlist file name
         refdes_list: List of pins and nets belong refdes
                      [['REFDES0',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
                       ['REFDES1',['net1', 'pin1'], ['net1', 'pin2'], ..., ['netN', 'pinN']],
@@ -34,10 +34,10 @@ class AllegroNetList:
     """
 
     def __init__(self, fname: str | Path) -> None:
-        """Get data from net-list (read from file)
+        """Get data from Netlist (read from file)
 
         Args:
-            fname: Path to the netlist file
+            fname: Path to the Netlist file
         """
         # Initialize instance attributes (not class attributes)
         self.net_list: list = []
@@ -51,16 +51,16 @@ class AllegroNetList:
         self.read_file(fname)
 
     def read_file(self, fname: str | Path) -> None:
-        """Read and parse netlist data from file.
+        """Read and parse Netlist data from file.
 
         The parser is a state machine that processes:
         1. Header lines (first 3 lines contain version/date/time)
         2. NET_NAME declarations (net name on next line)
         3. NODE_NAME entries (component + pin, with pin name 2 lines later)
-        4. END marker (final net-list termination)
+        4. END marker (final Netlist termination)
 
         Args:
-            fname: Path to netlist file
+            fname: Path to Netlist file
 
         Raises:
             ValueError: If file size exceeds maximum allowed size (default: 100MB)
@@ -171,7 +171,7 @@ class AllegroNetList:
 
                     except (IndexError, KeyError) as e:
                         parse_error_count += 1
-                        logger.warning(f'Error parsing net-list data (error #{parse_error_count}): {e}')
+                        logger.warning(f'Error parsing Netlist data (error #{parse_error_count}): {e}')
                         # Check if too many errors have occurred
                         if parse_error_count >= MAX_PARSE_ERRORS:
                             error_msg = f'Too many parsing errors ({parse_error_count} errors). File may be corrupted or not a valid netlist.'
@@ -204,14 +204,14 @@ class AllegroNetList:
             raise
 
     def net_list_length(self) -> int:
-        """Returns length of net-list"""
+        """Returns length of Netlist"""
         return len(self.net_list)
 
     def check_net_index(self, i: int) -> bool:
-        """Check valid net-list index (to get net name)
+        """Check valid Netlist index (to get net name)
 
         Args:
-            i: net-list index
+            i: Netlist index
 
         Returns:
             True if index is valid, False otherwise
@@ -231,7 +231,7 @@ class AllegroNetList:
             return True
 
     def net_name(self, i: int) -> Optional[str]:
-        """Returns net name from net-list
+        """Returns net name from Netlist
 
         Args:
             i: net name index
@@ -246,7 +246,7 @@ class AllegroNetList:
             return None
 
     def node_list(self, i: int) -> Optional[list]:
-        """Returns refdes and pin list from net-list
+        """Returns refdes and pin list from Netlist
 
         Args:
             i: net name index
@@ -325,7 +325,7 @@ class AllegroNetList:
 
         Returns:
             True if refdes was found and added to refdes list,
-            False if refdes was not found in net-list
+            False if refdes was not found in Netlist
         """
         refdes_list = [refdes]
         find_net = 0
@@ -345,7 +345,7 @@ class AllegroNetList:
         if find_net:
             return True
         else:
-            logger.error(f"Cannot find refdes '{refdes}' in net-list: {self.fname}")
+            logger.error(f"Cannot find refdes '{refdes}' in Netlist: {self.fname}")
             return False
 
     def get_net_name4refdes_pin(self, refdes: str, pin: str) -> Optional[str]:
@@ -407,21 +407,21 @@ class AllegroNetList:
         return net_and_node
 
     def __str__(self) -> str:
-        """Returns net-list as string"""
+        """Returns Netlist as string"""
         # Optimize: use join instead of string concatenation in loop, filter out None values
         lines = [self.net2string(i) for i in range(self.net_list_length())]
         lines = [line for line in lines if line is not None]
         return '\n'.join(lines)
 
     def net_list2string(self) -> str:
-        """Return net-list data as string"""
+        """Return Netlist data as string"""
         # Optimize: use join instead of string concatenation in loop, filter out None values
         lines = [self.net2string(i) for i in range(self.net_list_length())]
         lines = [line for line in lines if line is not None]
         return '\n'.join(lines) + '\n'
 
     def single_net_list2string(self) -> str:
-        """Return single net-list data as string"""
+        """Return single Netlist data as string"""
         # Optimize: use join with list comprehension, filter out None values
         lines = []
         for i in range(self.net_list_length()):
@@ -431,7 +431,7 @@ class AllegroNetList:
         return '\n'.join(lines) + '\n' if lines else ''
 
     def net_list_title(self) -> str:
-        """Return net-list title as string"""
+        """Return Netlist title as string"""
         date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # Optimize: use list and join instead of string concatenation
         lines = [
@@ -440,7 +440,7 @@ class AllegroNetList:
             '| NOTE: this file was auto-generated                                      |',
             f'| generation date, time: {date}                              |',
             '+-------------------------------------------------------------------------+',
-            '| Cadence net-list file info:                                             |',
+            '| Cadence Netlist file info:                                             |',
             f'|  {self.net_list_info()}',
             f'|  {self.fname}',
             '+-------------------------------------------------------------------------+'
@@ -466,7 +466,7 @@ class AllegroNetList:
         return '\n'.join(lines)
 
     def all_data2string(self) -> str:
-        """Return all net-list data (title, data, warnings) as string"""
+        """Return all Netlist data (title, data, warnings) as string"""
         s = self.net_list_title() + '\n'
         s = s + self.net_list2string()
         s = s + self.single_net_warnings()
@@ -474,7 +474,7 @@ class AllegroNetList:
         return s + '\n'
 
     def net_list2file(self, fname: str | Path = 'NetList.rpt', message_en: bool = False) -> None:
-        """Write net-list data (with title to string) to file
+        """Write Netlist data (with title to string) to file
 
         Args:
             fname: output file name
@@ -488,15 +488,15 @@ class AllegroNetList:
             with open(fname, 'w') as f:
                 f.write(s)
             if message_en:
-                logger.info(f'Wrote Net-List report file: {fname}')
+                logger.info(f'Wrote Netlist report file: {fname}')
         except (IOError, OSError) as e:
             error_msg = f"Failed to write output file '{fname}': {e}"
             logger.error(error_msg)
             raise IOError(error_msg)
 
     def net_list_info(self) -> str:
-        """Returns net-list info as string"""
-        return f'Net-list {self.date} {self.time} (version: {self.version})'
+        """Returns Netlist info as string"""
+        return f'Netlist {self.date} {self.time} (version: {self.version})'
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Format Cadence Allegro Net-List file (cnl - Cadence Let-List) to readable view
+"""Format Cadence Allegro Netlist file (cnl - Cadence Netlist) to readable view
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from .allegronetlist import AllegroNetList
 
 
 class CadenceNetListFormat(Frame):
-    """Format Cadence Allegro net-list file (cnl - Cadence net-list) to human readable view"""
+    """Format Cadence Allegro Netlist file (cnl - Cadence Netlist) to human readable view"""
 
     def __init__(self, parent=None) -> None:
         Frame.__init__(self, parent)
@@ -26,7 +26,7 @@ class CadenceNetListFormat(Frame):
         self.output_fname: str = 'NetList.rpt'
         self.cfg: Optional[ConfigFile] = None
         self.read_config_file()
-        self.master.title("Cadence Allegro Net-List Formatter")
+        self.master.title("Cadence Allegro Netlist Formatter")
         self.master.geometry("700x500")
         self.master.minsize(600, 400)
         self.pack(fill='both', expand=True, padx=10, pady=10)
@@ -35,7 +35,7 @@ class CadenceNetListFormat(Frame):
     def read_config_file(self) -> None:
         """Read configuration file with error handling and fallback to defaults"""
         k = {'Configuration': {'netlist_file': ''},
-             'Info': {'Description': 'Configuration file to Format Cadence Allegro net-list file'}}
+             'Info': {'Description': 'Configuration file to Format Cadence Allegro Netlist file'}}
         try:
             self.cfg = ConfigFile('.cnl_format.dat', k)
             self.cnl_fname = self.cfg.get_key('Configuration', 'netlist_file')
@@ -120,7 +120,7 @@ class CadenceNetListFormat(Frame):
                width=12).pack(side='right', padx=5)
 
         # Initial log message
-        self.log_message('Ready. Please select a netlist file to begin.')
+        self.log_message('Ready. Please select a Netlist file to begin.')
 
     def update_gui2self(self) -> None:
         """update from GUI to self data"""
@@ -136,11 +136,11 @@ class CadenceNetListFormat(Frame):
         self.save_config()
 
     def format_netlist(self) -> None:
-        """format netlist into readable report"""
+        """format Netlist into readable report"""
         # Validate input file
         if not self.cnl_fname or self.cnl_fname == '':
-            messagebox.showerror("Error", "Please select a netlist file first.")
-            self.log_message('ERROR: No netlist file selected.')
+            messagebox.showerror("Error", "Please select a Netlist file first.")
+            self.log_message('ERROR: No Netlist file selected.')
             return
 
         file_path = Path(self.cnl_fname)
@@ -167,7 +167,7 @@ class CadenceNetListFormat(Frame):
             with open(self.cnl_fname, 'r') as f:
                 first_line = f.readline().strip()
                 if not first_line.startswith('FILE_TYPE'):
-                    self.log_message('WARNING: File may not be a valid Cadence netlist (missing FILE_TYPE header)')
+                    self.log_message('WARNING: File may not be a valid Cadence Netlist (missing FILE_TYPE header)')
         except IOError as e:
             messagebox.showerror("Error", f"Cannot read file:\n{str(e)}")
             self.log_message(f'ERROR: Cannot read file: {str(e)}')
@@ -180,8 +180,8 @@ class CadenceNetListFormat(Frame):
             self.log_message(f'Starting format at {datetime.datetime.now().strftime("%H:%M:%S")}')
             self.log_message(f'Input file: {self.cnl_fname}')
 
-            # Parse netlist
-            self.log_message('Parsing netlist file...')
+            # Parse Netlist
+            self.log_message('Parsing Netlist file...')
             n = AllegroNetList(self.cnl_fname)
 
             # Generate report
@@ -217,8 +217,8 @@ class CadenceNetListFormat(Frame):
             messagebox.showerror("Unexpected Error", f"An unexpected error occurred:\n\n{str(e)}\n\nPlease report this issue.")
 
     def select_netlist(self) -> None:
-        """GUI to select net-list"""
-        fname = askopenfilename(filetypes=(("Cadence netlist", "pstxnet.dat"),
+        """GUI to select Netlist"""
+        fname = askopenfilename(filetypes=(("Cadence Netlist", "pstxnet.dat"),
                                            ("All files", "*.*")))
         if fname != '':
             self.cnl_fname = fname
@@ -278,7 +278,7 @@ class CadenceNetListFormat(Frame):
 
         if not output_path.exists():
             messagebox.showwarning("File Not Found",
-                                 f"Output file does not exist yet:\n{output_path}\n\nPlease format the netlist first.")
+                                 f"Output file does not exist yet:\n{output_path}\n\nPlease format the Netlist first.")
             self.log_message(f'Cannot open output file - file does not exist: {output_path}')
             return
 

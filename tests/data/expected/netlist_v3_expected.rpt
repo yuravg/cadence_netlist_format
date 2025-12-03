@@ -3,8 +3,8 @@
 | NOTE: this file was auto-generated                                      |
 | generation date, time: 2016-10-28 12:51:57                              |
 +-------------------------------------------------------------------------+
-| Cadence net-list file info:                                             |
-|  Net-list Mar-22-2016 10:54:51 (version: 16.3.0)
+| Cadence Netlist file info:                                             |
+|  Netlist Mar-22-2016 10:54:51 (version: 16.3.0)
 |  ../tests/data/inputs/pstxnet_v3.dat
 +-------------------------------------------------------------------------+
 A16910366_0_XXX3 DA74 13 C74 6 R74 5 DA74 s3 DD12 33
