@@ -223,7 +223,7 @@ test:
 	@echo "  3. Click 'Format Netlist' in GUI (generates NetList.rpt)"
 	@echo "  4. Compare: ./diff_netlist.sh"
 	@echo ""
-	@echo "Note: GUI always outputs to NetList.rpt (old versions: NetList.rpt,0, etc.)"
+	@echo "Note: GUI always outputs to NetList.rpt (old versions: NetList.rpt,01, etc.)"
 	@echo "Reference file: tests/data/expected/netlist_v3_expected.rpt"
 	@echo ""
 
@@ -329,7 +329,7 @@ test-run:
 	@echo "  3. Click 'Format Netlist' in GUI (generates NetList.rpt)"
 	@echo "  4. Compare: ./diff_netlist.sh"
 	@echo ""
-	@echo "Note: GUI always outputs to NetList.rpt (old versions: NetList.rpt,0, etc.)"
+	@echo "Note: GUI always outputs to NetList.rpt (old versions: NetList.rpt,01, etc.)"
 	@echo "Reference file: tests/data/expected/netlist_v3_expected.rpt"
 	@echo ""
 

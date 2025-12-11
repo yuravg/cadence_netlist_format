@@ -55,7 +55,7 @@ This directory serves as a manual testing workspace:
 The tool will:
 - Read `.cnl_format.dat` to remember the last file selection
 - Generate `NetList.rpt` with the formatted netlist
-- Auto-version old reports as `NetList.rpt,0`, `NetList.rpt,1`, etc.
+- Auto-version old reports as `NetList.rpt,01`, `NetList.rpt,02`, etc.
 
 ## Automated Testing
 

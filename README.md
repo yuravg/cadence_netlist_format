@@ -26,7 +26,7 @@ RESET X1 29 R64 1 R131 8
 
 - **GUI-based file selection** - Simple tkinter interface
 - **Smart config management** - Automatically saves your last file selection in the working directory (`.cnl_format.dat`)
-- **Auto-versioning** - Preserves old reports (NetList.rpt → NetList.rpt,0 → NetList.rpt,1)
+- **Auto-versioning** - Preserves old reports (NetList.rpt → NetList.rpt,01 → NetList.rpt,02)
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **Modern Python** - Requires Python 3.10+ with modern language features
 

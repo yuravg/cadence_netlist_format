@@ -323,8 +323,8 @@ class CadenceNetListFormat(Frame):
 
             # Phase 2: Rename old file if it exists
             if file_path.exists():
-                for i in range(100):
-                    backup_path = Path(f'{fname},{i}')
+                for i in range(1, 100):
+                    backup_path = Path(f'{fname},{i:02d}')
                     if not backup_path.exists():
                         file_path.rename(backup_path)
                         old_path = backup_path
@@ -333,7 +333,7 @@ class CadenceNetListFormat(Frame):
                 else:
                     # Reached max backups, cleanup temp and raise error
                     temp_path.unlink()
-                    raise IOError('Too many backup files (100+). Please clean up old backups.')
+                    raise IOError('Too many backup files (99+). Please clean up old backups.')
 
             # Phase 3: Rename temp file to target name
             temp_path.rename(file_path)
