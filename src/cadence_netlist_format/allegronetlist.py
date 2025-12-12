@@ -9,7 +9,6 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-__version__ = '2.0'
 
 # Configure module logger
 logger = logging.getLogger(__name__)

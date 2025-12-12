@@ -6,8 +6,6 @@ from __future__ import annotations
 from configparser import ConfigParser
 from typing import Optional
 
-__version__ = '2.0'
-
 
 class ConfigFile:
     """Work with configuration file, read and write key from/to configuration file
