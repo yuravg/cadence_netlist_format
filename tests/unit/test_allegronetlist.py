@@ -228,3 +228,51 @@ def test_net_list_sorting(sample_netlist_file):
     # Check alphabetical order
     assert net_names == sorted(net_names)
     assert net_names == ['NET1', 'NET2']
+
+
+@pytest.mark.unit
+def test_parser_state_reset_on_net_boundary(tmp_path):
+    """Test that parser state is reset when encountering NET_NAME.
+
+    Regression test for Issue #4: Parser state machine bug where
+    waiting_for_pin_name flag was not reset at NET_NAME boundaries,
+    potentially causing pin names to be extracted from wrong lines.
+    """
+    content = """FILE_TYPE = EXPANDEDNETLIST;
+{ Using PSTWRITER 16.3.0 p002Mar-22-2016 at 10:54:51 }
+NET_NAME
+'NET1'
+ '@CAPTURENAME.test':
+ C_SIGNAL='@test';
+NODE_NAME\tR1 1
+NET_NAME
+'NET2'
+ '@CAPTURENAME.test':
+ C_SIGNAL='@test';
+NODE_NAME\tC1 1
+ '@CAPTURENAME.test':
+ 'pin1':;
+END.
+"""
+    netlist_file = tmp_path / "state_test.dat"
+    netlist_file.write_text(content)
+
+    # Should parse without extracting wrong pin names
+    netlist = AllegroNetList(str(netlist_file))
+
+    # Verify correct parsing
+    assert netlist.net_list_length() == 2
+
+    # Check that NET1 and NET2 are both present
+    net_names = [net[0] for net in netlist.net_list]
+    assert 'NET1' in net_names
+    assert 'NET2' in net_names
+
+    # Verify nodes are correctly assigned to nets
+    for net in netlist.net_list:
+        if net[0] == 'NET1':
+            assert len(net[1]) == 1  # Should have R1
+            assert net[1][0][0] == 'R1'
+        elif net[0] == 'NET2':
+            assert len(net[1]) == 1  # Should have C1
+            assert net[1][0][0] == 'C1'

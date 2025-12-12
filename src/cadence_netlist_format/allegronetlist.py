@@ -13,6 +13,9 @@ from typing import Optional
 # Configure module logger
 logger = logging.getLogger(__name__)
 
+# Translation table for cleaning pin names (performance optimization)
+_PIN_NAME_TRANSLATE_TABLE = str.maketrans('', '', r"\ ';:")
+
 
 class AllegroNetList:
     """Cadence Allegro Netlist data
@@ -46,6 +49,7 @@ class AllegroNetList:
         self.refdes_list: list = []
         self.refdes_dict: dict[str, int] = {}  # Performance: O(1) lookup for refdes
         self.pin_name_index: dict[tuple[str, str], str] = {}  # Performance: O(1) lookup for (refdes, pin) -> pin_name
+        self.net_name_index: dict[tuple[str, str], str] = {}  # Performance: O(1) lookup for (refdes, pin) -> net_name
         self.fname: str = str(fname)
         self.read_file(fname)
 
@@ -127,6 +131,11 @@ class AllegroNetList:
                                 current_nodes = []
                                 self.net_list.append(net_and_node)
 
+                            # Reset pin name extraction state (fixes state machine bug)
+                            waiting_for_pin_name = False
+                            pin_name_line_counter = 0
+                            current_node_ref = None
+
                             # Prepare for next net name
                             expecting_net_name = True
                             current_net = s
@@ -150,10 +159,8 @@ class AllegroNetList:
                                 pin_name_line_counter += 1
                             else:
                                 waiting_for_pin_name = False
-                                # Clean up pin name (remove special characters)
-                                pin_name = s
-                                for char in r"\ ';:":
-                                    pin_name = pin_name.replace(char, '')
+                                # Clean up pin name (remove special characters) - optimized with str.translate()
+                                pin_name = s.translate(_PIN_NAME_TRANSLATE_TABLE)
                                 current_node_ref.append(pin_name)
 
                         # State 5: Parse header (first 3 lines contain metadata)
@@ -197,6 +204,15 @@ class AllegroNetList:
                         if len(node) >= 3:  # Ensure we have refdes, pin, and name
                             refdes, pin, name = node[0], node[1], node[2]
                             self.pin_name_index[(refdes, pin)] = name
+
+                # Build performance index: (refdes, pin) -> net_name mapping (for O(1) lookup)
+                for net in self.net_list:
+                    net_name = net[0]
+                    node_list = net[1]
+                    for node in node_list:
+                        if len(node) >= 2:  # Ensure we have refdes and pin
+                            refdes, pin = node[0], node[1]
+                            self.net_name_index[(refdes, pin)] = net_name
 
         except (IOError, OSError) as e:
             logger.error(f"Cannot read file '{fname}': {e}")
@@ -356,14 +372,10 @@ class AllegroNetList:
 
         Returns:
             Net name if found, None otherwise
+
+        Performance: O(1) lookup using net_name_index dictionary
         """
-        for i in self.refdes_list:
-            if i[0] == refdes:
-                net_pin = i[1:]
-                for j in net_pin:
-                    if j[1] == pin:
-                        return j[0]
-        return None
+        return self.net_name_index.get((refdes, pin), None)
 
     def refdes_list2string(self, refdes: str) -> Optional[str]:
         """Returns refdes_list (for selected refdes) as string

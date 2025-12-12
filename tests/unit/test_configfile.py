@@ -202,3 +202,30 @@ def test_configfile_str_representation(empty_config_file):
     assert 'Section2' in config_str
     assert 'key1' in config_str
     assert 'value1' in config_str
+
+
+@pytest.mark.unit
+def test_configfile_edit_key_creates_missing_section(tmp_path):
+    """Test that edit_key creates section if it doesn't exist.
+
+    Regression test for Issue #5: Missing input validation in ConfigFile.edit_key()
+    which would cause KeyError when trying to edit a key in a non-existent section.
+    """
+    config_file = tmp_path / "test.ini"
+    config_file.write_text("[Existing]\nkey=value\n")
+
+    cfg = ConfigFile(str(config_file), verbosity=0)
+
+    # Edit key in non-existent section (should auto-create, not raise KeyError)
+    cfg.edit_key('NewSection', 'newkey', 'newvalue')
+
+    # Verify section was created
+    assert 'NewSection' in cfg.k
+    assert cfg.k['NewSection']['newkey'] == 'newvalue'
+
+    # Verify it persists when written
+    cfg.write2file()
+
+    # Reload and verify
+    cfg2 = ConfigFile(str(config_file), verbosity=0)
+    assert cfg2.get_key('NewSection', 'newkey') == 'newvalue'

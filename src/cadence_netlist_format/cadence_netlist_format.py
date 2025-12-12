@@ -4,6 +4,7 @@
 """
 
 from __future__ import annotations
+import configparser
 import datetime
 import subprocess
 import sys
@@ -39,7 +40,7 @@ class CadenceNetListFormat(Frame):
         try:
             self.cfg = ConfigFile('.cnl_format.dat', k)
             self.cnl_fname = self.cfg.get_key('Configuration', 'netlist_file')
-        except (IOError, OSError, KeyError) as e:
+        except (IOError, OSError, KeyError, configparser.Error) as e:
             # Config file is corrupted or unreadable - fall back to defaults
             print(f'Warning: Cannot read config file, using defaults: {e}')
             self.cfg = None
@@ -209,12 +210,6 @@ class CadenceNetListFormat(Frame):
             self.log_message(error_msg)
             self.log_message('=' * 60)
             messagebox.showerror("Format Error", f"File format is invalid:\n\n{str(e)}")
-        except Exception as e:
-            # Catch unexpected errors but log them differently
-            error_msg = f'ERROR: Unexpected error during formatting: {str(e)}'
-            self.log_message(error_msg)
-            self.log_message('=' * 60)
-            messagebox.showerror("Unexpected Error", f"An unexpected error occurred:\n\n{str(e)}\n\nPlease report this issue.")
 
     def select_netlist(self) -> None:
         """GUI to select Netlist"""

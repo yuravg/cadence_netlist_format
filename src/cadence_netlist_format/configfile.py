@@ -97,7 +97,13 @@ class ConfigFile:
         """
         if self.verbosity:
             print(f'Edit key: section: {section}, keys: {kname}={kval}')
-        self.k[str(section)][str(kname)] = kval
+
+        # Auto-create section if it doesn't exist (prevents KeyError)
+        section_str = str(section)
+        if section_str not in self.k:
+            self.k[section_str] = {}
+
+        self.k[section_str][str(kname)] = kval
 
     def get_all_keys(self) -> dict:
         """Returns all keys as dictionary"""
