@@ -248,6 +248,8 @@ class CadenceNetListFormat(Frame):
     def _open_with_system_app(self, path: str | Path) -> None:
         """Open a file or directory with the system's default application.
 
+        Launches the application in detached mode without waiting for it to complete.
+
         Args:
             path: Path to file or directory to open
 
@@ -261,13 +263,15 @@ class CadenceNetListFormat(Frame):
                     import os
                     os.startfile(path_str)
                 case 'darwin':  # macOS
-                    ret = subprocess.call(['open', path_str])
-                    if ret != 0:
-                        raise OSError(f'open command failed with return code {ret}')
+                    subprocess.Popen(['open', path_str],
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL,
+                                   start_new_session=True)
                 case _:  # linux and other Unix-like systems
-                    ret = subprocess.call(['xdg-open', path_str])
-                    if ret != 0:
-                        raise OSError(f'xdg-open command failed with return code {ret}')
+                    subprocess.Popen(['xdg-open', path_str],
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL,
+                                   start_new_session=True)
         except OSError as e:
             # Handle case where command doesn't exist
             raise OSError(f'Failed to open with system application: {e}')
