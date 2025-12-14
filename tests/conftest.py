@@ -127,3 +127,60 @@ def change_to_temp_dir(temp_dir, monkeypatch):
     """
     monkeypatch.chdir(str(temp_dir))
     return temp_dir
+
+
+# Test count validation hook
+def get_expected_test_count():
+    """Read expected test count from pyproject.toml.
+
+    Returns:
+        int: Expected number of tests, or None if not configured
+    """
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore
+
+    try:
+        with open('pyproject.toml', 'rb') as f:
+            data = tomllib.load(f)
+            return data.get('tool', {}).get('cadence_netlist_format', {}).get('testing', {}).get('expected_test_count')
+    except (FileNotFoundError, KeyError):
+        return None
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_collection_finish(session):
+    """Validate test count after collection.
+
+    This hook runs after pytest collects all tests but before execution.
+    Validates that collected test count matches expected count in pyproject.toml.
+
+    Args:
+        session: pytest session object containing collected items
+
+    Raises:
+        pytest.UsageError: If test count doesn't match expected count
+    """
+    expected_count = get_expected_test_count()
+
+    if expected_count is None:
+        # Not configured - skip validation
+        return
+
+    collected_count = len(session.items)
+
+    if collected_count != expected_count:
+        msg = (
+            f"\n{'='*70}\n"
+            f"TEST COUNT VALIDATION FAILED\n"
+            f"{'='*70}\n"
+            f"Expected: {expected_count} tests\n"
+            f"Collected: {collected_count} tests\n"
+            f"Difference: {collected_count - expected_count:+d} tests\n"
+            f"\nTo update the expected count, edit pyproject.toml:\n"
+            f"  [tool.cadence_netlist_format.testing]\n"
+            f"  expected_test_count = {collected_count}\n"
+            f"{'='*70}\n"
+        )
+        raise pytest.UsageError(msg)

@@ -339,9 +339,8 @@ pytest: venv
 	@echo "║  Running Pytest Tests                                                 ║"
 	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@.venv/bin/python -m pytest
-	@echo ""
-	@echo "✓ All tests complete"
+	@.venv/bin/python -m pytest && { echo ""; echo "✓ All tests passed successfully"; } || \
+									{ echo ""; echo "✗ Tests failed"; false; }
 
 coverage: venv
 	@echo "╔═══════════════════════════════════════════════════════════════════════╗"

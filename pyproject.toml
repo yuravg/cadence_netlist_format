@@ -53,3 +53,7 @@ markers = [
 ]
 # Minimum Python version for testing
 minversion = "7.0"
+
+# Test count validation (custom configuration)
+[tool.cadence_netlist_format.testing]
+expected_test_count = 62
