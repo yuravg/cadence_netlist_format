@@ -106,7 +106,7 @@ build: check-deps
 	@$(MAKE) clean
 	@echo "Building $(project) v$(version) (source)..."
 	@$(PYTHON) -m build --wheel
-	@echo "✓ Build complete: $(get_latest_pkg)"
+	@echo "✓ Build complete: $$(ls -t dist/*.whl 2>/dev/null | head -1)"
 
 # Build both wheel and source distribution
 dist: check-deps
@@ -127,12 +127,13 @@ info:
 	@echo "Python: $(PYTHON)"
 	@echo ""
 	@echo "Built Package:"
-	@if [ -z "$(get_latest_pkg)" ]; then \
+	@latest_pkg=$$(ls -t dist/*.whl 2>/dev/null | head -1); \
+	if [ -z "$$latest_pkg" ]; then \
 		echo "  ⚠ No package found in dist/"; \
 		echo "  Run 'make build' to create one"; \
 	else \
-		echo "  $(get_latest_pkg)"; \
-		ls -lh $(get_latest_pkg) | awk '{print "  Size: " $$5 "  Modified: " $$6 " " $$7 " " $$8}'; \
+		echo "  $$latest_pkg"; \
+		ls -lh $$latest_pkg | awk '{print "  Size: " $$5 "  Modified: " $$6 " " $$7 " " $$8}'; \
 	fi
 	@echo ""
 	@echo "Installation Status:"
@@ -149,16 +150,17 @@ info:
 
 # Install the most recently built package
 install: check-deps
-	@if [ -z "$(get_latest_pkg)" ]; then \
+	@latest_pkg=$$(ls -t dist/*.whl 2>/dev/null | head -1); \
+	if [ -z "$$latest_pkg" ]; then \
 		echo "ERROR: No package found in dist/. Run 'make build' first."; \
 		exit 1; \
-	fi
-	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
-	@echo "║  Installing: $(get_latest_pkg)"
-	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
-	@pipx install $(get_latest_pkg) --force
-	@echo ""
-	@echo "✓ Installation complete. Run 'cnl_format' to start."
+	fi; \
+	echo "╔═══════════════════════════════════════════════════════════════════════╗"; \
+	echo "║  Installing: $$latest_pkg"; \
+	echo "╚═══════════════════════════════════════════════════════════════════════╝"; \
+	pipx install $$latest_pkg --force; \
+	echo ""; \
+	echo "✓ Installation complete. Run 'cnl_format' to start."
 
 # Install in editable/development mode with dev dependencies
 dev-install: check-deps
@@ -171,13 +173,14 @@ dev-install: check-deps
 
 # Force reinstall (useful during development)
 reinstall: check-deps
-	@if [ -z "$(get_latest_pkg)" ]; then \
+	@latest_pkg=$$(ls -t dist/*.whl 2>/dev/null | head -1); \
+	if [ -z "$$latest_pkg" ]; then \
 		echo "ERROR: No package found in dist/. Run 'make build' first."; \
 		exit 1; \
-	fi
-	@echo "Force reinstalling: $(get_latest_pkg)"
-	@pipx install $(get_latest_pkg) --force
-	@echo "✓ Reinstallation complete"
+	fi; \
+	echo "Force reinstalling: $$latest_pkg"; \
+	pipx install $$latest_pkg --force; \
+	echo "✓ Reinstallation complete"
 
 # Build and install
 all:
@@ -281,19 +284,20 @@ test-env:
 	fi
 
 test-env-install: test-env
-	@if [ -z "$(get_latest_pkg)" ]; then \
+	@latest_pkg=$$(ls -t dist/*.whl 2>/dev/null | head -1); \
+	if [ -z "$$latest_pkg" ]; then \
 		echo "ERROR: No package found in dist/. Run 'make build' first."; \
 		exit 1; \
-	fi
-	@echo "Installing built package in test environment..."
-	@test_env/bin/pip install --upgrade pip
-	@test_env/bin/pip install $(get_latest_pkg) --force-reinstall
-	@echo ""
-	@echo "✓ Test environment installation complete"
-	@echo "  Package: $(get_latest_pkg)"
-	@echo "  Python: test_env/bin/python"
-	@echo "  Run with: test_env/bin/cnl_format"
-	@echo "  Or use: make test-run"
+	fi; \
+	echo "Installing built package in test environment..."; \
+	test_env/bin/pip install --upgrade pip; \
+	test_env/bin/pip install $$latest_pkg --force-reinstall; \
+	echo ""; \
+	echo "✓ Test environment installation complete"; \
+	echo "  Package: $$latest_pkg"; \
+	echo "  Python: test_env/bin/python"; \
+	echo "  Run with: test_env/bin/cnl_format"; \
+	echo "  Or use: make test-run"
 
 test-env-dev:
 	@$(MAKE) build
