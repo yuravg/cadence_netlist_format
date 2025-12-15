@@ -347,7 +347,7 @@ coverage: venv
 	@echo "║  Running Pytest with Coverage                                         ║"
 	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@.venv/bin/python -m pytest --cov=cadence_netlist_format --cov-report=html --cov-report=term
+	@.venv/bin/python -m pytest --cov=src/cadence_netlist_format --cov-report=html --cov-report=term
 	@echo ""
 	@echo "✓ Coverage report generated:"
 	@echo "  - Terminal output above"
